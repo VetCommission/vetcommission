@@ -1,3 +1,3 @@
-# VetCommission
+## Integrações
 
-Sistema de gerenciamento de comissões para profissionais veterinários.
+O VetCommission utiliza Linear, Slack e GitHub para organizar, comunicar e rastrear o desenvolvimento.
