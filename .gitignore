@@ -1,0 +1,5 @@
+# Configurações locais e segredos
+.env
+.env.*
+!.env.example
+backup/
