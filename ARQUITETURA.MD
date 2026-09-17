@@ -1,12 +1,20 @@
-# Arquitetura Global para MVPs — PostgreSQL + Worker
+# Arquitetura Global do Sistema
 
-> Versao 2: adaptada para o projeto VetCommission e para laboratorios com PostgreSQL local, processamento em background, Linear e Slack.
+> Versao 3: arquitetura de aplicacao independente do fornecedor de banco de dados.
 
-Este documento define um padrao global de arquitetura para iniciar novos softwares mantendo a mesma organizacao, nomenclatura, stack e estilo de codigo. Ele deve ser usado como base para MVPs com API .NET, Worker .NET, frontend Next.js e PostgreSQL local executado em Docker.
+Este documento define o padrao global para softwares com API .NET, Worker .NET e frontend Next.js. Ele governa camadas, dependencias, seguranca, multitenancy, processamento, frontend, testes e processo de entrega sem acoplar a aplicacao a um mecanismo de banco especifico.
 
 O objetivo e permitir criar um novo produto do zero sem reinventar estrutura, camadas, fluxo de dados, padroes de erro, autenticacao, autorizacao, services, forms e organizacao de features.
 
-> Use este arquivo como contrato arquitetural. O dominio de cada produto muda, mas a forma de organizar API, frontend, contratos, banco, testes e padroes de codigo deve permanecer consistente.
+> Use este arquivo como contrato arquitetural principal. Toda tarefa de persistencia tambem deve ler o perfil de banco ativo indicado abaixo.
+
+## Perfil de Banco Ativo
+
+```text
+ARQUITETURA_POSTGRES_DB.MD
+```
+
+Somente um perfil de banco pode estar ativo por projeto. Para trocar o mecanismo de persistencia, substitua o perfil ativo, por exemplo por `ARQUITETURA_SQLSERVER_DB.MD`, sem reescrever as regras de aplicacao deste documento.
 
 ## Stack Padrao
 
@@ -17,20 +25,19 @@ O objetivo e permitir criar um novo produto do zero sem reinventar estrutura, ca
 - MediatR
 - FluentValidation
 - Entity Framework Core
-- Npgsql Entity Framework Core Provider
-- PostgreSQL
+- provider do EF Core definido pelo perfil de banco ativo
 - JWT Bearer Authentication
 - Authorization policies por recurso/permissao
 - Serilog
 - Swagger/Swashbuckle
 - xUnit para testes unitarios e de integracao
-- Testcontainers for .NET para testes de integracao com PostgreSQL real
+- testes de integracao contra o mecanismo real definido pelo perfil ativo
 
 ### Processamento em Background
 
 - .NET Worker Service como executavel separado da WebApi
 - `BackgroundService` para busca e execucao de trabalhos pendentes
-- PostgreSQL como fila persistente na primeira versao
+- banco relacional configurado como fila persistente na primeira versao
 - padroes de idempotencia, retry controlado e Outbox
 - compartilhamento de `Domain`, `Application` e `Infrastructure` com a WebApi
 
@@ -47,14 +54,14 @@ O objetivo e permitir criar um novo produto do zero sem reinventar estrutura, ca
 - ESLint com `eslint-config-next/core-web-vitals`
 - Node.js controlado por `.node-version`
 
-### Banco e Automacao
+### Persistencia e Automacao
 
-- PostgreSQL local executado por Docker Compose
 - Database First: scripts SQL versionados como fonte principal de evolucao do schema
 - scaffold do EF Core executado somente depois da alteracao do banco
+- provider, tipos, comandos e ambiente local definidos pelo perfil de banco ativo
 - PowerShell para execucao local
 - tabela de controle de versao dos scripts do banco
-- Scripts de start para API e frontend
+- scripts de start para banco, API, Worker e frontend
 
 ## Estrutura Global do Repositorio
 
@@ -99,6 +106,7 @@ Todos os scripts PowerShell do repositorio devem ficar exclusivamente em `script
     <NomeProjeto>.IntegrationTests/
   README.md
   ARQUITETURA.MD
+  ARQUITETURA_<BANCO>_DB.MD
 ```
 
 ## Direcao das Dependencias
@@ -319,7 +327,7 @@ WebApi/
 
 Responsavel por:
 
-- localizar processamentos pendentes no PostgreSQL;
+- localizar processamentos pendentes no banco configurado;
 - reservar um trabalho de maneira atomica;
 - executar calculos em background;
 - registrar progresso, conclusao e falha;
@@ -440,7 +448,7 @@ Em desenvolvimento:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=vetcommission;Username=vetcommission;Password=development-only"
+    "DefaultConnection": ""
   },
   "Jwt": {
     "Issuer": "<NomeProjeto>",
@@ -465,7 +473,7 @@ Swagger: http://localhost:5077/swagger
 Frontend: http://localhost:3000
 ```
 
-Segredos reais nao devem ser versionados. O valor de desenvolvimento acima e apenas um exemplo e deve ser alinhado ao `.env` local do Docker Compose. Em ambientes compartilhados, usar variaveis de ambiente ou um provedor de segredos.
+Connection strings e segredos reais nao devem ser versionados. O perfil de banco define as variaveis locais necessarias. Em ambientes compartilhados, usar variaveis de ambiente ou um provedor de segredos.
 
 ## Resultado Padronizado
 
@@ -797,7 +805,7 @@ Defesa em profundidade:
 - repositorios continuam recebendo `tenantId` explicitamente nos casos sensiveis;
 - `SaveChangesInterceptor` valida entidades isoladas antes do commit;
 - testes de integracao comprovam que um tenant nao le ou altera dados de outro;
-- Row-Level Security do PostgreSQL sera estudado como camada adicional, sem substituir as validacoes da aplicacao no MVP.
+- recursos nativos de isolamento oferecidos pelo perfil de banco podem ser usados como camada adicional, sem substituir as validacoes da aplicacao.
 
 ## Autorizacao por Recursos
 
@@ -840,117 +848,46 @@ Regras:
 
 ## Persistencia
 
-Pacotes principais:
-
-```text
-Npgsql.EntityFrameworkCore.PostgreSQL
-EFCore.NamingConventions
-Microsoft.EntityFrameworkCore.Design
-Microsoft.EntityFrameworkCore.Tools
-```
+`Infrastructure` concentra o provider do EF Core, o `DbContext`, modelos gerados, mapeamentos, repositorios e unidade de trabalho. `Domain` e `Application` nao dependem do mecanismo de banco.
 
 ### Estrategia Database First
 
-O banco e a fonte de verdade estrutural. A sequencia obrigatoria e:
+O banco e a fonte de verdade estrutural da persistencia. A sequencia obrigatoria e:
 
 ```text
-Criar/alterar script PostgreSQL
--> revisar o script
--> aplicar no banco local
--> validar constraints e indices
+criar novo script evolutivo
+-> revisar constraints, indices e isolamento de tenant
+-> aplicar no banco
+-> validar a estrutura
 -> executar scaffold do EF Core
--> revisar o diff gerado
+-> revisar todo o diff gerado
 -> ajustar mappers e repositorios
 -> executar build e testes
 ```
 
-Regras do scaffold:
+Regras globais:
 
-- classes geradas ficam em `Infrastructure/Persistence/Generated`;
+- scripts aplicados sao imutaveis;
+- correcoes usam uma nova versao;
+- o mecanismo de controle de versoes e definido pelo perfil ativo;
+- arquivos gerados ficam em `Infrastructure/Persistence/Generated`;
 - arquivos gerados nao recebem regras de negocio nem alteracoes manuais;
-- entidades de dominio continuam em `Domain` e nao sao sobrescritas pelo scaffold;
-- repositorios convertem modelos de persistencia para entidades de dominio quando necessario;
-- extensoes ao codigo gerado usam classes parciais em arquivos separados;
+- entidades de dominio permanecem em `Domain`;
+- extensoes usam arquivos separados ou pontos parciais;
 - a connection string nao pode ser gravada no codigo gerado;
-- sempre usar `--no-onconfiguring`;
-- todo scaffold deve ser seguido de revisao do diff para detectar remocoes ou alteracoes inesperadas;
-- nao usar `EnsureCreated`, `EnsureDeleted` ou migrations para evoluir o schema normal do produto.
+- sempre executar scaffold sem gerar configuracao de conexao no `DbContext`;
+- revisar o diff para detectar remocoes ou mudancas inesperadas;
+- nao usar `EnsureCreated`, `EnsureDeleted` ou EF Migrations para evoluir o schema normal.
 
-Registro padrao:
+### Organizacao Logica dos Schemas
 
-```csharp
-services.AddDbContext<<NomeProjeto>DbContext>(options =>
-    options
-        .UseNpgsql(connectionString, npgsql =>
-            npgsql.EnableRetryOnFailure())
-        .UseSnakeCaseNamingConvention());
-```
+- `core`: objetos reutilizaveis praticamente sem alteracao em outros produtos;
+- `business`: objetos que existem por causa do dominio do produto;
+- objetos da aplicacao nao devem ser criados no schema padrao do fornecedor;
+- tabelas usam nome singular, em ingles e `snake_case`;
+- consultas e mapeamentos qualificam o schema explicitamente.
 
-`EnableRetryOnFailure` atende falhas transitorias de conexao. Ele nao autoriza repetir automaticamente comandos de negocio nao idempotentes fora da estrategia de execucao e da transacao adequada.
-
-Formato simplificado esperado do `DbContext` gerado:
-
-```csharp
-public partial class <NomeProjeto>DbContext : DbContext
-{
-    public <NomeProjeto>DbContext(DbContextOptions<<NomeProjeto>DbContext> options)
-        : base(options)
-    {
-    }
-
-    public virtual DbSet<Persistence.Entities.Cliente> Clientes { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Persistence.Entities.Cliente>(entity =>
-        {
-            entity.ToTable("customer", "business");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Nome).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Ativo).HasDefaultValue(true);
-            entity.HasIndex(e => e.TenantId).HasDatabaseName("ix_customer_tenant_id");
-            entity.HasIndex(e => new { e.TenantId, e.Nome }).HasDatabaseName("ix_customer_tenant_id_name");
-        });
-
-        OnModelCreatingPartial(modelBuilder);
-    }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-}
-```
-
-O trecho e ilustrativo. O arquivo real e produzido pelo scaffold e nao deve ser editado manualmente.
-
-Regras PostgreSQL:
-
-- tabelas, colunas, indices e constraints usam `snake_case`;
-- a aplicacao usa somente os schemas `core` e `business`;
-- `core` contem objetos reutilizaveis por sistemas derivados desta arquitetura, como versionamento, tenant, identidade, outbox, jobs, notificacoes e auditoria;
-- `business` contem objetos especificos do dominio do produto, como clinicas, profissionais, procedimentos, regras e calculos de comissao;
-- antes de criar um objeto, deve-se perguntar se ele poderia ser reutilizado praticamente sem alteracao em outro produto: se sim, pertence a `core`; caso contrario, pertence a `business`;
-- tabelas da aplicacao nao sao criadas em `public`;
-- tabelas usam nomes no singular e nao recebem prefixos como `tb_`;
-- scripts e consultas qualificam tabelas explicitamente com o schema;
-- primary keys usam `pk_<tabela>`;
-- unique constraints usam `uk_<tabela>_<colunas>`;
-- foreign keys usam `fk_<origem>_<destino>`;
-- indices usam `ix_<tabela>_<colunas>`;
-- `Guid` e persistido como `uuid`;
-- instante global e persistido como `timestamp with time zone` (`timestamptz`) e tratado em UTC;
-- valores monetarios usam `numeric(18,2)` ou precisao explicitamente definida pelo dominio;
-- campos booleanos usam `boolean`;
-- `jsonb` so e usado quando o dado e realmente semiestruturado e nao substitui modelagem relacional normal;
-- enum persistido como int com `HasConversion<int>()`;
-- strings com `HasMaxLength`;
-- indices nomeados explicitamente;
-- FK configurada explicitamente;
-- leitura sem alteracao usa `AsNoTracking()`;
-- filtros multi-tenant sempre incluem `TenantId`.
-- configuracoes refletidas do banco permanecem no codigo gerado pelo scaffold;
-- configuracoes adicionais usam pontos de extensao parciais ou classes separadas, sem editar arquivos gerados;
-- consultas de texto devem considerar diferencas de collation e case sensitivity em relacao ao SQL Server;
-- indices devem ser validados com `EXPLAIN (ANALYZE, BUFFERS)` nos fluxos criticos.
-
+O perfil ativo define a sintaxe fisica, tipos, convencoes de constraints e implementacao desses schemas.
 ## Repositorios
 
 Interface no dominio:
@@ -1010,133 +947,19 @@ Regras:
 - nao expor `IQueryable` para Application;
 - manter includes apenas quando necessarios ao caso de uso.
 
-## Banco de Dados
+## Perfil de Banco de Dados
 
-Padrao:
+As regras fisicas de persistencia ficam exclusivamente no perfil ativo. Para o VetCommission, leia `ARQUITETURA_POSTGRES_DB.MD` antes de:
 
-```text
-database/
-  dbconfig.json
-  scripts/
-    V001__create_database_version_table.sql
-    V002__remove_legacy_public_database_version.sql
-    V003__create_tenant_table.sql
-    V004__create_user_table.sql
-    V005__create_clinic_table.sql
-    V006__insert_initial_development_data.sql
-scriptsPS/
-  ExecutarScriptsDB.ps1
-  Scaffold-EF.ps1
-docker-compose.yml
-.env.example
-```
+- criar ou alterar scripts SQL;
+- configurar o provider do EF Core;
+- executar scaffold;
+- implementar reserva concorrente de jobs;
+- criar testes de integracao com banco;
+- analisar indices e planos de execucao;
+- executar backup ou restore.
 
-Fonte de verdade do schema:
-
-```text
-Scripts SQL PostgreSQL versionados
-Historico: core.database_version
-```
-
-### Convencao obrigatoria dos scripts
-
-Todo script evolutivo deve seguir o formato:
-
-```text
-VNNN__descricao_da_alteracao.sql
-```
-
-Exemplos:
-
-```text
-V001__create_database_version_table.sql
-V002__remove_legacy_public_database_version.sql
-V003__create_tenant_table.sql
-V004__create_clinic_table.sql
-V005__add_document_to_professional.sql
-```
-
-Regras de nomenclatura:
-
-- `V` identifica um script de versao;
-- `NNN` e um numero sequencial com tres digitos, iniciado em `001`;
-- duas ocorrencias de sublinhado (`__`) separam a versao da descricao;
-- a descricao usa ingles, letras minusculas e `snake_case`;
-- a versao e o nome do arquivo devem ser unicos;
-- nao pode haver salto, reutilizacao ou renumeracao de versoes ja compartilhadas;
-- scripts de seed evolutivo seguem a mesma numeracao dos scripts estruturais.
-
-### Regras de evolucao
-
-- cada alteracao estrutural nasce em um novo script SQL numerado;
-- scripts aplicados nunca sao alterados; correcoes usam um novo script;
-- scripts devem ser idempotentes quando tecnicamente seguro;
-- o `scriptsPS/ExecutarScriptsDB.ps1` controla `BEGIN`, registro em `core.database_version` e `COMMIT` na mesma transacao;
-- scripts SQL evolutivos nao devem declarar `BEGIN`, `COMMIT` ou `ROLLBACK`, pois o controle transacional pertence ao executor;
-- se qualquer comando falhar, a alteracao nao pode ser registrada como aplicada;
-- o executor registra versao, descricao, nome, hash, usuario e data UTC de aplicacao em `core.database_version`;
-- se o hash de um script ja aplicado mudar, a execucao deve falhar;
-- scripts pendentes sao executados obrigatoriamente em ordem crescente de versao;
-- a primeira versao cria os schemas `core` e `business`, cria `core.database_version` e registra `V001`;
-- o scaffold acontece somente depois de todos os scripts pendentes serem aplicados;
-- seeds devem refletir usuarios, tenants e recursos basicos de desenvolvimento;
-- alteracoes destrutivas devem ser explicitadas e executadas conscientemente;
-- o container usa volume nomeado para persistir os dados locais;
-- credenciais locais ficam no `.env`, que nao e versionado;
-- `.env.example` contem apenas nomes e valores seguros de exemplo.
-- scripts PowerShell carregam `POSTGRES_DB` e `POSTGRES_USER` do `.env` da raiz e nao mantem nomes de banco ou usuario duplicados no codigo;
-- `POSTGRES_CONTAINER_NAME` pode ser informado no `.env`; quando ausente, o ambiente local usa `vetcommission-postgres`.
-- antes de aplicar qualquer script pendente, `scriptsPS/ExecutarScriptsDB.ps1` deve exibir o caminho do arquivo de ambiente, o container e o banco de destino;
-- a execucao exige confirmacao interativa exata no formato `ATUALIZAR <nome-do-banco>` e nao oferece parametro de bypass, inclusive para reduzir o risco de aplicar scripts quando o `.env` aponta para producao;
-
-### Contrato de execucao para o Codex
-
-Sempre que uma tarefa alterar a estrutura ou os dados controlados do banco, o Codex deve:
-
-1. consultar o maior numero existente em `database/scripts`;
-2. criar um novo arquivo com a proxima versao, sem editar scripts anteriores;
-3. usar sintaxe PostgreSQL e nomes de objetos em `snake_case`;
-4. incluir constraints, FKs e indices definidos pelo requisito no proprio script;
-5. deixar o controle transacional a cargo do `scriptsPS/ExecutarScriptsDB.ps1`;
-6. executar os scripts pendentes pelo `scriptsPS/ExecutarScriptsDB.ps1`;
-7. validar a estrutura e os registros de `core.database_version` no PostgreSQL;
-8. executar o `Scaffold-EF.ps1` somente depois da validacao do banco;
-9. revisar o diff do scaffold e preservar os pontos de extensao manuais;
-10. executar build e testes antes de concluir a tarefa;
-11. nunca usar EF Core Migrations, `EnsureCreated` ou edicao manual dos modelos gerados para substituir esse processo.
-
-Se o Codex identificar que um script ja aplicado precisa de correcao, deve criar uma nova versao corretiva. A alteracao retroativa de um script aplicado e proibida, mesmo em ambiente local compartilhado pelo Git.
-
-Comandos principais:
-
-```powershell
-docker compose up -d postgres
-docker compose ps
-docker compose logs postgres
-.\scriptsPS\ExecutarScriptsDB.ps1
-.\scriptsPS\Scaffold-EF.ps1
-```
-
-Comando equivalente de scaffold:
-
-```powershell
-dotnet ef dbcontext scaffold `
-  "Host=localhost;Port=5432;Database=vetcommission;Username=vetcommission;Password=<senha-local>" `
-  Npgsql.EntityFrameworkCore.PostgreSQL `
-  --project src\<NomeProjeto>.Infrastructure `
-  --context <NomeProjeto>DbContext `
-  --context-dir Persistence\Generated `
-  --output-dir Persistence\Generated\Entities `
-  --schema core `
-  --schema business `
-  --no-onconfiguring `
-  --force
-```
-
-O script `scriptsPS/Scaffold-EF.ps1` encapsula esse comando e le a conexao de configuracao local nao versionada. A senha nunca deve aparecer em commit, log ou documentacao real.
-
-O banco local padrao e `vetcommission`, exposto somente em `localhost:5432`.
-
+Se o perfil ativo e este documento divergirem, interrompa a implementacao e corrija a documentacao antes de alterar codigo ou banco.
 ## Middlewares
 
 Padroes globais:
@@ -1179,7 +1002,7 @@ Unitarios:
 Integracao:
 
 - usar `WebApplicationFactory<Program>`;
-- usar PostgreSQL real em container dedicado com Testcontainers;
+- usar o banco real definido pelo perfil ativo em ambiente isolado;
 - seed controlado;
 - helper para cliente autenticado;
 - helper para aplicar tenant ativo;
@@ -1193,7 +1016,7 @@ CreateAuthenticatedClientAsync(...)
 Seed(...)
 ```
 
-Nao usar EF Core InMemory para validar comportamento de persistencia, SQL, constraints, concorrencia, transacoes ou isolamento multi-tenant. Esses testes precisam executar contra PostgreSQL.
+Nao usar EF Core InMemory para validar comportamento de persistencia, SQL, constraints, concorrencia, transacoes ou isolamento multi-tenant. Esses testes precisam executar contra o mecanismo real do perfil ativo.
 
 ---
 
@@ -1758,10 +1581,10 @@ Regras:
 
 Para uma entidade chamada `<Entidade>` dentro de `<Modulo>`:
 
-1. Criar o novo script SQL PostgreSQL numerado.
+1. Criar o novo script SQL numerado conforme o perfil ativo.
 2. Revisar constraints, FKs, indices e isolamento por `tenant_id`.
 3. Aplicar o script com `ExecutarScriptsDB.ps1`.
-4. Validar a estrutura diretamente no PostgreSQL.
+4. Validar a estrutura diretamente no banco.
 5. Executar `Scaffold-EF.ps1`.
 6. Revisar todo o diff gerado no `DbContext` e nos modelos de persistencia.
 7. Criar ou atualizar a entidade em `Domain/Entities/<Entidade>.cs`.
@@ -1918,13 +1741,34 @@ POST /api/pedidos/{id}/cancelar
 
 # Comandos Padrao
 
+## Processo de Entrega
+
+Toda alteracao deve estar vinculada a uma issue do Linear e seguir:
+
+```text
+Ready -> In Progress -> branch -> commit -> Pull Request -> Testing -> merge -> Done
+```
+
+Regras:
+
+- branch parte da `main` atualizada e usa o nome sugerido pelo Linear;
+- titulo do commit e do PR inclui o identificador da issue;
+- PR tem `main` como base e descreve alteracoes e validacoes;
+- merge ocorre somente depois de revisar diff, build e testes aplicaveis;
+- branch remota e local sao removidas depois do merge;
+- conhecimento relevante e registrado na issue, preferencialmente em Problema, Causa e Solucao;
+- Linear e a fonte de controle do trabalho;
+- Slack centraliza comunicacao e visibilidade, mas nao substitui a issue nem a documentacao;
+- notificacoes automaticas devem ser acionaveis e evitar ruido;
+- integracao propria do Worker com Slack so e criada quando existirem eventos reais de negocio ou operacao.
+
 ## Rodar Tudo
 
 ```powershell
 .\scriptsPS\Start-All.ps1
 ```
 
-O script inicia PostgreSQL, API, Worker e frontend, validando antes se o container esta saudavel.
+O script inicia o banco do perfil ativo, API, Worker e frontend, validando antes se a persistencia esta saudavel.
 
 ## Rodar API
 
@@ -1958,10 +1802,7 @@ dotnet run --project src\<NomeProjeto>.WebApi\<NomeProjeto>.WebApi.csproj --laun
 
 ## Banco
 
-```powershell
-docker compose up -d postgres
-docker compose ps
-```
+Consulte a secao de comandos do perfil de banco ativo.
 
 ## Validacao
 
@@ -2000,8 +1841,8 @@ npm run build
 - Forms usam React Hook Form + Zod.
 - DTOs e enums devem ser sincronizados entre backend e frontend.
 - Permissoes devem ter catalogo equivalente no backend e frontend.
-- Database First e obrigatorio: primeiro alterar o PostgreSQL por script versionado, depois atualizar o EF Core por scaffold.
-- Scripts SQL PostgreSQL sao a fonte de verdade estrutural do banco.
+- Database First e obrigatorio: primeiro alterar o banco por script versionado, depois atualizar o EF Core por scaffold.
+- Scripts SQL do perfil ativo sao a fonte de verdade estrutural do banco.
 - Arquivos gerados pelo scaffold nao recebem regras de negocio nem alteracoes manuais.
 - Processamentos demorados nao executam dentro da requisicao HTTP.
 - WebApi e Worker sao executaveis separados da mesma solucao.
@@ -2022,196 +1863,3 @@ npm run build
 Esses elementos devem ser definidos no projeto concreto, mantendo a arquitetura deste documento como base.
 
 ---
-
-# Plano de Estudo Reduzido — VetCommission
-
-O desenvolvimento .NET, Next.js e Git ja e familiar. O laboratorio concentra o aprendizado em PostgreSQL, Linear e Slack. O estudo e orientado por entregas, sem prazo diario fixo.
-
-## Resultado Esperado
-
-Ao final do ciclo reduzido, o desenvolvedor deve conseguir:
-
-- modelar e consultar o VetCommission em PostgreSQL;
-- explicar diferencas relevantes entre PostgreSQL e SQL Server;
-- diagnosticar uma consulta com `EXPLAIN ANALYZE`;
-- executar o banco local em Docker com volume e Health Check;
-- criar e acompanhar trabalho no Linear usando issues, projeto e cycle;
-- relacionar issue, branch e pull request;
-- usar Slack para comunicacao, atualizacoes do Linear e alertas do sistema;
-- explicar por que o Worker existe e como processa trabalhos com seguranca.
-
-## Etapa 1 — Linear na Operacao
-
-Objetivo: usar o Linear como fonte unica do trabalho.
-
-Configurar:
-
-```text
-Workspace: vetcommission
-Team: VET
-Project: VetCommission
-Cycle: Ciclo 1 - Fundacao PostgreSQL
-```
-
-Estados:
-
-```text
-Backlog -> Ready -> In Progress -> In Review -> Testing -> Done
-```
-
-Labels minimas:
-
-```text
-postgresql, infrastructure, backend, frontend, worker, slack, study, bug
-```
-
-Pratica obrigatoria:
-
-1. criar issue com objetivo e criterios de aceite;
-2. mover para `In Progress` apenas ao iniciar;
-3. criar branch contendo o identificador da issue;
-4. relacionar pull request e issue;
-5. concluir a issue somente apos validacao;
-6. registrar em `Conhecimento adquirido` o que foi aprendido.
-
-Resultado observavel:
-
-- backlog priorizado;
-- trabalho atual visivel;
-- issue vinculada ao codigo;
-- historico de decisao e aceite preservado.
-
-## Etapa 2 — PostgreSQL Local
-
-Objetivo: aprender PostgreSQL implementando a fundacao real do produto.
-
-Issues iniciais:
-
-```text
-VET - Subir PostgreSQL local com Docker Compose
-VET - Conectar ao banco pelo DBeaver ou pgAdmin
-VET - Configurar Npgsql e scaffold Database First
-VET - Criar Tenant e Usuario
-VET - Validar isolamento entre tenants
-VET - Criar indices do primeiro fluxo
-VET - Analisar consulta com EXPLAIN ANALYZE
-```
-
-Conteudo essencial:
-
-- database, schema, role e privileges;
-- `uuid`, `boolean`, `numeric`, `jsonb` e `timestamptz`;
-- primary key, foreign key, unique constraint e check constraint;
-- indices simples, compostos e parciais;
-- transacoes, locks e niveis de isolamento;
-- `INSERT ... ON CONFLICT`;
-- `FOR UPDATE SKIP LOCKED` para reserva concorrente de jobs;
-- `EXPLAIN (ANALYZE, BUFFERS)`;
-- backup e restore local;
-- Row-Level Security como estudo complementar.
-
-Resultado observavel:
-
-- container saudavel e dados persistentes apos reinicio;
-- todos os scripts aplicados com sucesso em banco vazio;
-- scaffold reproduzivel e sem connection string no codigo;
-- dois tenants de teste sem vazamento de dados;
-- consulta critica acompanhada de plano de execucao interpretado.
-
-## Etapa 3 — Worker e Processamento
-
-Objetivo: retirar calculos demorados do ciclo HTTP e praticar concorrencia do PostgreSQL.
-
-Issues iniciais:
-
-```text
-VET - Criar projeto VetCommission.Worker
-VET - Registrar solicitacao de processamento
-VET - Reservar job atomicamente
-VET - Implementar idempotencia do calculo
-VET - Registrar tentativas e falhas
-VET - Implementar Outbox
-```
-
-Resultado observavel:
-
-- API responde `202 Accepted`;
-- Worker processa o item pendente;
-- reinicio nao perde o trabalho;
-- duas instancias nao processam o mesmo item;
-- repeticao da mesma solicitacao nao duplica comissoes.
-
-## Etapa 4 — Slack na Operacao
-
-Objetivo: separar comunicacao humana de notificacao tecnica.
-
-Canais:
-
-```text
-#vetcomm-geral     discussoes gerais
-#vetcomm-dev       decisoes e duvidas tecnicas
-#vetcomm-linear    atualizacoes de projeto e issues
-#vetcomm-operacao  fechamento e contestacao
-#vetcomm-alertas   falhas e indisponibilidade
-```
-
-Uso inicial sem codigo:
-
-1. instalar a integracao oficial do Linear;
-2. direcionar atualizacoes do projeto para `#vetcomm-linear`;
-3. compartilhar links de issues nas threads;
-4. transformar conversas que geram trabalho em issues;
-5. evitar usar mensagens do Slack como backlog.
-
-Uso posterior com codigo:
-
-1. criar um Slack App do VetCommission;
-2. habilitar Incoming Webhook para um canal de laboratorio;
-3. armazenar a URL em segredo local;
-4. publicar mensagens pela Outbox;
-5. aplicar retry com limite e registrar falhas;
-6. impedir notificacao duplicada.
-
-Eventos iniciais:
-
-```text
-Calculo concluido -> #vetcomm-operacao
-Contestacao aberta -> #vetcomm-operacao
-Competencia fechada -> #vetcomm-operacao
-Falha de processamento -> #vetcomm-alertas
-```
-
-Resultado observavel:
-
-- atualizacoes do Linear aparecem no canal correto;
-- mensagens tecnicas exibem ambiente, tenant, processamento e correlation id;
-- segredos nao aparecem no Git nem nos logs;
-- falha do Slack nao desfaz a transacao de negocio.
-
-## Primeiro Ciclo Executavel
-
-Ordem recomendada:
-
-1. configurar projeto, cycle, estados e labels no Linear;
-2. conectar Linear ao GitHub e ao Slack;
-3. subir PostgreSQL com Docker Compose;
-4. conectar pelo cliente de banco;
-5. criar a solution e os projetos, incluindo Worker;
-6. configurar Npgsql, executor de scripts e scaffold;
-7. implementar Tenant e Usuario;
-8. criar teste de isolamento multi-tenant;
-9. criar o primeiro job persistente;
-10. concluir o ciclo com uma retrospectiva curta no Linear.
-
-## Limites do Laboratorio Inicial
-
-Nao entram no primeiro ciclo:
-
-- Kubernetes;
-- microservicos;
-- RabbitMQ ou Kafka;
-- banco separado por tenant;
-- PostgreSQL em nuvem;
-- regras avancadas de comissao;
-- Slack bidirecional complexo;
-- automacoes pagas do Linear.
