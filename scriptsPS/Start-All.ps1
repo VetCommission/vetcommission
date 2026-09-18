@@ -9,6 +9,20 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     throw 'Docker não encontrado no PATH.'
 }
 
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+try {
+    docker info > $null 2> $null
+    $dockerExitCode = $LASTEXITCODE
+}
+finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+}
+
+if ($dockerExitCode -ne 0) {
+    throw 'Docker esta instalado, mas o daemon nao esta acessivel. Abra o Docker Desktop, aguarde ele ficar em execucao e rode o script novamente.'
+}
+
 $requiredFiles = @(
     'Start-Api.ps1',
     'Start-Worker.ps1',

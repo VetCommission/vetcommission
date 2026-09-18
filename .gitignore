@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 backup/
+.tmp/
 
 # .NET
 **/bin/

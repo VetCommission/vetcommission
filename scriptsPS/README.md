@@ -4,6 +4,7 @@ Execute os scripts a partir da raiz do repositório. Pré-requisitos:
 
 - .NET SDK 10;
 - Node.js `24.17.0`;
+- `nvm`, `fnm` ou `volta`, recomendado para ativar automaticamente a versao Node definida em `.node-version`;
 - Docker Desktop;
 - arquivo `.env` local baseado em `.env.example`.
 
@@ -31,7 +32,34 @@ O `Start-All.ps1` aguarda o health check do PostgreSQL antes de iniciar os demai
 .\scriptsPS\Build-Frontend.ps1
 ```
 
-O script executa `npm ci`, lint e build usando a versão Node definida em `.node-version`.
+O script executa `npm ci`, lint e build usando a versão Node definida em `.node-version`. Se a versao ativa for diferente e `nvm`, `fnm` ou `volta` estiver instalado, o script tenta ativar `24.17.0` automaticamente. Com `nvm` ou `volta`, a versao tambem pode ser instalada automaticamente quando ainda nao existir localmente. Apos `nvm use`, os scripts atualizam o `PATH` do processo atual para reconhecer o novo `node`.
+
+## Validar uma implementacao antes do commit/PR
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1
+```
+
+O script executa o processo padrao de pos-implementacao:
+
+- `dotnet restore`, `dotnet build` e `dotnet test`;
+- `npm ci`, `npm run lint` e `npm run build`;
+- PostgreSQL via Docker Compose;
+- health check da API em `http://localhost:5077/health`;
+- start tecnico do Worker;
+- start tecnico do frontend em `http://localhost:3000`;
+- `git diff --check` e `git status --short`.
+
+Use parametros para rodar partes do processo quando necessario:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipRuntime
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipFrontend
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipDotNet
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -KeepRuntimeProcesses
+```
+
+Por padrao, processos iniciados pelo script sao encerrados ao final. Use `-KeepRuntimeProcesses` apenas quando quiser continuar testando manualmente a API, o Worker ou o frontend.
 
 ## Diagnóstico rápido
 
@@ -43,6 +71,12 @@ node --version
 ```
 
 Os scripts falham cedo quando um executável, projeto ou versão obrigatória não está disponível. Nenhum segredo é armazenado neles.
+
+Se a validacao parar no Docker, abra o Docker Desktop, aguarde o engine ficar ativo e execute novamente. Para rodar apenas build/test sem subir runtime local:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipRuntime
+```
 
 ## Banco de dados
 
