@@ -1,5 +1,8 @@
 [CmdletBinding()]
-param()
+param(
+    [switch]$KeepBlockingProcesses,
+    [switch]$RefreshDependencies
+)
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -39,6 +42,65 @@ function Get-CurrentNodeVersion {
     }
 
     return node --version
+}
+
+function Test-TcpPortInUse {
+    param([Parameter(Mandatory)][int]$Port)
+
+    try {
+        $connections = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+        return $null -ne $connections
+    }
+    catch {
+        return $false
+    }
+}
+
+function Get-ProcessIdsUsingTcpPort {
+    param([Parameter(Mandatory)][int]$Port)
+
+    try {
+        return @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty OwningProcess -Unique)
+    }
+    catch {
+        return @()
+    }
+}
+
+function Stop-ProcessesUsingTcpPort {
+    param(
+        [Parameter(Mandatory)][int]$Port,
+        [Parameter(Mandatory)][string]$Reason
+    )
+
+    $processIds = @(Get-ProcessIdsUsingTcpPort $Port)
+    if ($processIds.Count -eq 0) {
+        return
+    }
+
+    if ($KeepBlockingProcesses) {
+        throw "A porta $Port esta em uso por processo(s) $($processIds -join ', ') e bloqueia: $Reason. Feche manualmente ou rode sem -KeepBlockingProcesses."
+    }
+
+    foreach ($processId in $processIds) {
+        if ($processId -eq $PID) {
+            continue
+        }
+
+        Stop-Process -Id $processId -Force
+        Write-Host "Processo na porta $Port encerrado para liberar: $Reason. PID: $processId"
+    }
+}
+
+function Test-FrontendDependenciesReady {
+    $nodeModulesPath = Join-Path $frontendPath 'node_modules'
+    $eslintCommandPath = Join-Path $frontendPath 'node_modules\.bin\eslint.cmd'
+    $nextCommandPath = Join-Path $frontendPath 'node_modules\.bin\next.cmd'
+
+    return (Test-Path -LiteralPath $nodeModulesPath -PathType Container) `
+        -and (Test-Path -LiteralPath $eslintCommandPath -PathType Leaf) `
+        -and (Test-Path -LiteralPath $nextCommandPath -PathType Leaf)
 }
 
 $currentNodeVersion = Get-CurrentNodeVersion
@@ -99,10 +161,17 @@ if ($currentNodeVersion -ne $requiredNodeVersion) {
 
 Push-Location $frontendPath
 try {
-    npm.cmd ci
-    if ($LASTEXITCODE -ne 0) {
-        throw "npm ci falhou com código $LASTEXITCODE."
+    if ($RefreshDependencies -or -not (Test-FrontendDependenciesReady)) {
+        Stop-ProcessesUsingTcpPort 3000 'npm ci do frontend'
+        npm.cmd ci
+        if ($LASTEXITCODE -ne 0) {
+            throw "npm ci falhou com código $LASTEXITCODE."
+        }
     }
+    else {
+        Write-Host 'Dependencias do frontend ja parecem instaladas. Pulando npm ci. Use -RefreshDependencies para reinstalar.'
+    }
+
 
     npm.cmd run lint
     if ($LASTEXITCODE -ne 0) {

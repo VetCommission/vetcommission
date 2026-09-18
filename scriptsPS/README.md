@@ -32,7 +32,13 @@ O `Start-All.ps1` aguarda o health check do PostgreSQL antes de iniciar os demai
 .\scriptsPS\Build-Frontend.ps1
 ```
 
-O script executa `npm ci`, lint e build usando a versão Node definida em `.node-version`. Se a versao ativa for diferente e `nvm`, `fnm` ou `volta` estiver instalado, o script tenta ativar `24.17.0` automaticamente. Com `nvm` ou `volta`, a versao tambem pode ser instalada automaticamente quando ainda nao existir localmente. Apos `nvm use`, os scripts atualizam o `PATH` do processo atual para reconhecer o novo `node`.
+O script executa lint e build usando a versão Node definida em `.node-version`. Quando `node_modules` nao existir ou estiver incompleto, executa `npm ci`; quando ja estiver consistente, reaproveita as dependencias locais. Para reinstalar dependencias, use:
+
+```powershell
+.\scriptsPS\Build-Frontend.ps1 -RefreshDependencies
+```
+
+Se a versao ativa do Node for diferente e `nvm`, `fnm` ou `volta` estiver instalado, o script tenta ativar `24.17.0` automaticamente. Com `nvm` ou `volta`, a versao tambem pode ser instalada automaticamente quando ainda nao existir localmente. Apos `nvm use`, os scripts atualizam o `PATH` do processo atual para reconhecer o novo `node`.
 
 ## Validar uma implementacao antes do commit/PR
 
@@ -43,7 +49,8 @@ O script executa `npm ci`, lint e build usando a versão Node definida em `.node
 O script executa o processo padrao de pos-implementacao:
 
 - `dotnet restore`, `dotnet build` e `dotnet test`;
-- `npm ci`, `npm run lint` e `npm run build`;
+- `npm ci` somente quando `node_modules` nao existir, estiver incompleto ou quando `-RefreshFrontendDependencies` for informado;
+- `npm run lint` e `npm run build`;
 - PostgreSQL via Docker Compose;
 - health check da API em `http://localhost:5077/health`;
 - start tecnico do Worker;
@@ -57,9 +64,78 @@ Use parametros para rodar partes do processo quando necessario:
 .\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipFrontend
 .\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipDotNet
 .\scriptsPS\Invoke-PostImplementationChecks.ps1 -KeepRuntimeProcesses
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -RefreshFrontendDependencies
 ```
 
-Por padrao, processos iniciados pelo script sao encerrados ao final. Use `-KeepRuntimeProcesses` apenas quando quiser continuar testando manualmente a API, o Worker ou o frontend.
+Por padrao, processos iniciados pelo script sao encerrados ao final. Use `-KeepRuntimeProcesses` apenas quando quiser continuar testando manualmente a API, o Worker ou o frontend. Se uma porta necessaria estiver em uso, o script encerra o processo bloqueante; use `-KeepBlockingProcesses` para impedir esse comportamento e falhar com orientacao manual.
+
+### Exemplos de uso
+
+Validacao completa padrao:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1
+```
+
+Validacao rapida sem subir PostgreSQL, API, Worker e frontend:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipRuntime
+```
+
+Validacao apenas de backend, ignorando frontend:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipFrontend
+```
+
+Validacao apenas de frontend, ignorando .NET:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipDotNet -SkipDocker -SkipRuntime
+```
+
+Validacao limpa reinstalando dependencias do frontend:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -RefreshFrontendDependencies
+```
+
+Validacao mantendo API, Worker e frontend ligados ao final:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -KeepRuntimeProcesses
+```
+
+Validacao sem encerrar processos que estejam usando portas necessarias:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -KeepBlockingProcesses
+```
+
+Validacao ignorando apenas Docker/PostgreSQL, mas ainda tentando subir os runtimes:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipDocker
+```
+
+Build do frontend reaproveitando `node_modules` quando estiver consistente:
+
+```powershell
+.\scriptsPS\Build-Frontend.ps1
+```
+
+Build do frontend reinstalando dependencias:
+
+```powershell
+.\scriptsPS\Build-Frontend.ps1 -RefreshDependencies
+```
+
+Build do frontend sem encerrar processos na porta `3000`:
+
+```powershell
+.\scriptsPS\Build-Frontend.ps1 -KeepBlockingProcesses
+```
 
 ## Diagnóstico rápido
 
@@ -77,6 +153,8 @@ Se a validacao parar no Docker, abra o Docker Desktop, aguarde o engine ficar at
 ```powershell
 .\scriptsPS\Invoke-PostImplementationChecks.ps1 -SkipRuntime
 ```
+
+O `npm ci` limpa `node_modules`; por isso ele nao precisa rodar sempre. Use reinstalacao apenas quando `node_modules` nao existir, estiver incompleto, quando dependencias mudarem ou antes de uma validacao bem limpa de PR. Se houver frontend/`next dev` aberto na porta `3000`, os scripts encerram esse processo antes de reinstalar dependencias, salvo quando `-KeepBlockingProcesses` for usado.
 
 ## Banco de dados
 
