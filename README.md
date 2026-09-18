@@ -12,7 +12,7 @@ SaaS multi-tenant para controlar produção, cálculo, conferência, contestaç�
 
 ## Estado atual
 
-O repositório contém os contratos de arquitetura, requisitos de produto/UI/UX e a fundação local do PostgreSQL. Os projetos .NET e Next.js ainda serão criados incrementalmente depois da aprovação das decisões arquiteturais bloqueantes.
+O repositório contém os contratos de arquitetura, requisitos de produto/UI/UX, a fundação local do PostgreSQL, a solução .NET 10 e o frontend Next.js. A fundação não antecipa entidades, tabelas ou telas funcionais do domínio.
 
 ## Infraestrutura local existente
 
@@ -21,6 +21,9 @@ O repositório contém os contratos de arquitetura, requisitos de produto/UI/UX 
 - Controle de scripts em `core.database_version`.
 - Executor, backup e restore em `scriptsPS/`.
 - Scripts evolutivos imutáveis em `database/scripts/`.
+- WebApi em `http://localhost:5077`, com health check em `/health`.
+- Worker separado, sem jobs de negócio nesta etapa.
+- Frontend Next.js em `http://localhost:3000`.
 
 Consulte [scriptsPS/README.md](scriptsPS/README.md) para os comandos disponíveis.
 
