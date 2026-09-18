@@ -8,7 +8,7 @@ Os arquivos desta pasta foram aprovados ou utilizados como base durante o alinha
 
 ### `REFERENCIAS_VISUAIS/01_MOCKUP_GERAL_SISTEMA.png`
 Referência principal para:
-- landing;
+- landing, somente como referência para evolução futura;
 - login;
 - dashboard;
 - profissionais;

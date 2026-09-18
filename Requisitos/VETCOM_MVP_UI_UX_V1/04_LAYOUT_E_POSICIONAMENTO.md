@@ -131,6 +131,8 @@ Estrutura:
 
 ## 9. Landing page
 
+Fora do primeiro corte operacional do MVP; manter este layout apenas como referência para evolução futura.
+
 - topo com marca à esquerda;
 - links no centro;
 - CTA à direita;

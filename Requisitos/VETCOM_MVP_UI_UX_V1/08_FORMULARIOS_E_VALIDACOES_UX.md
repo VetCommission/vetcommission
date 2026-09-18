@@ -19,6 +19,8 @@ Não depender apenas de asterisco; quando útil, informar “Obrigatório”.
 - Alinhar valores de forma consistente.
 - Evitar ambiguidade entre valor unitário, total e comissão.
 - Em cálculo, mostrar memória simples quando isso aumentar transparência.
+- No lançamento de produção, tratar o valor padrão do procedimento somente como sugestão editável.
+- Preservar no lançamento a quantidade, o valor unitário efetivamente praticado e o valor total, sem depender de alterações futuras no cadastro do procedimento.
 
 ## 4. Percentuais
 
@@ -31,6 +33,8 @@ Não depender apenas de asterisco; quando útil, informar “Obrigatório”.
 - Exibir formato local.
 - Em vigências, deixar claro “início” e “fim”.
 - Em competência, preferir mês/ano quando dia não for relevante.
+- Identificar a data de realização do procedimento como data de negócio da produção.
+- Usar a data de criação do registro apenas como informação de auditoria.
 
 ## 6. Selects
 
@@ -74,7 +78,9 @@ Se houve alteração:
 A descrição deve aceitar explicação suficiente.
 Motivo deve ser selecionável.
 Valor esperado é contextual, não obrigatório em todos os motivos.
-Evidência é opcional no MVP.
+Evidência textual é opcional no MVP; anexos de arquivos ficam fora do primeiro corte.
+Enquanto estiver em análise, novas mensagens, justificativas e complementações textuais devem ser adicionadas à mesma contestação e exibidas em ordem cronológica.
+Não permitir uma segunda contestação em andamento para a mesma produção.
 
 ## 11. Fechamento
 

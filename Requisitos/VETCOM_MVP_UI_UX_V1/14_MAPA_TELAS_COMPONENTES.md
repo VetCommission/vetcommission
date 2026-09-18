@@ -2,7 +2,7 @@
 
 | Área | Tela | Blocos principais | Ação principal |
 |---|---|---|---|
-| Pública | Landing | Header, Hero, Benefícios, Funcionamento, CTA | Entrar / conhecer |
+| Evolução futura | Landing comercial | Header, Hero, Benefícios, Funcionamento, CTA | Fora do primeiro corte |
 | Pública | Login | Formulário, apoio visual | Entrar |
 | Admin | Dashboard | KPIs, gráficos, últimas movimentações | Registrar produção |
 | Admin | Profissionais | Filtros, tabela | Novo profissional |
@@ -16,10 +16,10 @@
 | Admin | Produção detalhe | Dados, cálculo, histórico | Editar quando permitido |
 | Admin | Comissões | KPIs, filtros, tabela | Consultar |
 | Admin | Contestações | Abas, tabela | Analisar |
-| Admin | Contestação detalhe | Comparativo, evidências, histórico | Aprovar/Rejeitar |
+| Admin | Contestação detalhe | Comparativo, evidências textuais, linha do tempo | Complementar/Aprovar/Rejeitar |
 | Admin | Fechamentos | Competências, status | Abrir período |
 | Admin | Fechamento detalhe | Resumo, pendências, tabela | Finalizar período |
-| Admin | Relatórios | Filtros, resumo, gráfico, tabela | Exportar |
+| Admin | Relatórios | Filtros, resumo, gráfico, tabela | Consultar |
 | Admin | Configurações | Dados clínica | Salvar |
 | Profissional | Dashboard | KPIs, evolução, últimas produções | Ver extrato |
 | Profissional | Meus procedimentos | Filtros, lista | Ver detalhe |
@@ -28,7 +28,7 @@
 | Profissional | Extrato | Filtros, lista | Ver lançamento |
 | Profissional | Nova contestação | Contexto, formulário | Enviar |
 | Profissional | Minhas contestações | Abas, lista | Ver detalhe |
-| Profissional | Contestação detalhe | Status, conteúdo, histórico | Consultar |
+| Profissional | Contestação detalhe | Status, conteúdo, linha do tempo | Consultar/complementar |
 | Profissional | Fechamentos | Lista de competências | Ver detalhe |
 | Profissional | Meu perfil | Dados, segurança | Alterar senha / sair |
 

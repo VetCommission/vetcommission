@@ -20,6 +20,9 @@ então deve ver o valor total e uma prévia da comissão antes de confirmar.
 Aceite UX:
 - produção e comissão são diferenciadas;
 - regra utilizada é identificável;
+- a data de realização determina a competência, a regra aplicável e a validação do período aberto;
+- o valor padrão do procedimento é apenas uma sugestão editável;
+- quantidade, valor unitário efetivamente praticado e valor total ficam preservados no lançamento;
 - confirmação de sucesso é exibida.
 
 ## Jornada C — Profissional consulta comissão
@@ -55,7 +58,9 @@ Aceite UX:
 - não precisa redigitar dados do lançamento;
 - motivo e descrição são claros;
 - envio gera confirmação;
-- status pode ser acompanhado.
+- status pode ser acompanhado;
+- complementações e evidências textuais permanecem na mesma contestação até a decisão final;
+- anexos de arquivos não são exigidos nem oferecidos no primeiro corte.
 
 ## Jornada F — Analisar contestação
 
@@ -65,7 +70,8 @@ então deve comparar registro e solicitação e tomar decisão justificada.
 
 Aceite UX:
 - valores comparáveis;
-- evidência acessível;
+- evidências textuais e complementações acessíveis em ordem cronológica;
+- novas interações permanecem vinculadas à contestação original;
 - aprovar/rejeitar claramente separados;
 - justificativa registrada.
 
@@ -77,7 +83,7 @@ então pendências devem aparecer antes da confirmação.
 
 Aceite UX:
 - resumo do período;
-- contestações;
+- todas as contestações ainda não resolvidas são apresentadas e bloqueiam o fechamento;
 - inconsistências;
 - consequência do fechamento;
 - confirmação explícita.
