@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\VetCommission.Domain\VetCommission.Domain.csproj" />
     <ProjectReference Include="..\..\src\VetCommission.Application\VetCommission.Application.csproj" />
+    <ProjectReference Include="..\..\src\VetCommission.Infrastructure\VetCommission.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

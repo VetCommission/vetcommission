@@ -160,6 +160,37 @@ O `npm ci` limpa `node_modules`; por isso ele nao precisa rodar sempre. Use rein
 
 Execute os scripts a partir da raiz do repositorio, com o Docker Desktop aberto e o container `vetcommission-postgres` em execucao.
 
+## Sincronizar banco e scaffold EF Core
+
+Para aplicar scripts SQL pendentes e, em seguida, regenerar o scaffold EF Core:
+
+```powershell
+.\scriptsPS\Sync-Database-And-Scaffold.ps1
+```
+
+O comando reaproveita a confirmacao manual do executor de banco. Quando solicitado, digite exatamente:
+
+```text
+ATUALIZAR vetcommission
+```
+
+Tambem e possivel informar arquivo de ambiente ou container:
+
+```powershell
+.\scriptsPS\Sync-Database-And-Scaffold.ps1 -EnvironmentFile ".\.env" -ContainerName "vetcommission-postgres"
+```
+
+Para rodar as etapas separadamente:
+
+```powershell
+.\scriptsPS\ExecutarScriptsDB.ps1
+.\scriptsPS\Scaffold-EF.ps1
+```
+
+O scaffold le `.env`, monta a connection string local sem exibir senha, gera somente os schemas `core` e `business`, e usa `--no-onconfiguring` com `--force`. Depois de rodar, revise todo o diff gerado em `src/VetCommission.Infrastructure/Persistence/Generated`.
+
+O scaffold usa ferramenta local versionada em `.config/dotnet-tools.json`. Se houver um `dotnet-ef` global antigo na maquina, ele sera ignorado pelo script. O script executa `dotnet tool restore` antes do scaffold.
+
 ## Gerar backup
 
 ```powershell
