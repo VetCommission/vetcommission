@@ -22,9 +22,13 @@ public static class DependencyInjection
                 options
                     .UseNpgsql(connectionString, npgsql => npgsql.EnableRetryOnFailure())
                     .UseSnakeCaseNamingConvention());
+            services.AddScoped<IAuthRepository, AuthRepository>();
+        }
+        else
+        {
+            services.AddScoped<IAuthRepository, UnavailableAuthRepository>();
         }
 
-        services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 
         return services;
