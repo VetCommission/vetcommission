@@ -1,4 +1,50 @@
-# Scripts PowerShell do PostgreSQL
+# Scripts PowerShell do VetCommission
+
+Execute os scripts a partir da raiz do repositório. Pré-requisitos:
+
+- .NET SDK 10;
+- Node.js `24.17.0`;
+- Docker Desktop;
+- arquivo `.env` local baseado em `.env.example`.
+
+## Iniciar os componentes
+
+Em terminais separados:
+
+```powershell
+.\scriptsPS\Start-Api.ps1
+.\scriptsPS\Start-Worker.ps1
+.\scriptsPS\Start-Frontend.ps1
+```
+
+Para iniciar PostgreSQL, API, Worker e frontend de uma vez:
+
+```powershell
+.\scriptsPS\Start-All.ps1
+```
+
+O `Start-All.ps1` aguarda o health check do PostgreSQL antes de iniciar os demais componentes. A API usa `http://localhost:5077` e o frontend usa `http://localhost:3000`.
+
+## Validar o frontend
+
+```powershell
+.\scriptsPS\Build-Frontend.ps1
+```
+
+O script executa `npm ci`, lint e build usando a versão Node definida em `.node-version`.
+
+## Diagnóstico rápido
+
+```powershell
+docker compose ps
+docker logs vetcommission-postgres
+dotnet --version
+node --version
+```
+
+Os scripts falham cedo quando um executável, projeto ou versão obrigatória não está disponível. Nenhum segredo é armazenado neles.
+
+## Banco de dados
 
 Execute os scripts a partir da raiz do repositorio, com o Docker Desktop aberto e o container `vetcommission-postgres` em execucao.
 
