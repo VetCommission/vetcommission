@@ -31,7 +31,7 @@ Arquivo de referência visual principal:
 
 Essa referência contém:
 
-1. Tela de aterrissagem / landing page.
+1. Tela de aterrissagem / landing page, mantida somente como referência para evolução futura.
 2. Tela de login.
 3. Paleta e elementos visuais.
 4. Dashboard administrativo.
@@ -498,6 +498,8 @@ Itens principais:
 
 ## 10.1. Landing Page
 
+> Fora do primeiro corte operacional do MVP. Esta especificação permanece como referência para evolução futura.
+
 ### Objetivo visual
 Apresentar o produto de forma amigável, leve e confiável.
 
@@ -559,11 +561,12 @@ Layout em duas áreas verticais ou colunas:
 - e-mail;
 - senha;
 - lembrar de mim;
-- esqueci minha senha;
 - botão entrar.
 
 ### Observação
 Se login social for usado futuramente, ele não deve quebrar o padrão visual aprovado.
+
+O primeiro corte não possui autocadastro público nem recuperação automatizada de senha. A tela atende somente usuários previamente cadastrados e ativos.
 
 ---
 
@@ -769,7 +772,7 @@ Conteúdo:
 ## 11.8. Tela de Relatórios
 
 ### Objetivo visual
-Permitir consulta consolidada e exportação.
+Permitir consulta consolidada das informações do período.
 
 ### Estrutura da tela
 
@@ -781,9 +784,7 @@ Centro:
 - gráfico principal ou resumo visual;
 - tabela complementar.
 
-Rodapé superior ou lateral de ação:
-- exportar PDF;
-- exportar Excel.
+No primeiro corte, os relatórios são consultivos. Ações de exportação serão adicionadas somente em evolução futura.
 
 ### Observação visual
 A tela deve parecer limpa e analítica.
@@ -802,9 +803,10 @@ Elementos:
 - e-mail;
 - senha;
 - lembrar de mim;
-- recuperar senha;
 - botão entrar;
 - imagem leve de apoio na área inferior.
+
+O primeiro corte não apresenta autocadastro nem recuperação automatizada de senha.
 
 ---
 
@@ -939,7 +941,7 @@ Campos:
 - procedimento/lançamento;
 - motivo;
 - descrição;
-- anexo opcional.
+- evidência textual opcional.
 
 ### Rodapé de ação
 - enviar contestação.
@@ -982,10 +984,12 @@ Bloco central:
 - valor informado;
 - motivo;
 - descrição;
-- anexo.
+- evidências e complementações textuais;
 
 Bloco inferior:
-- histórico da contestação.
+- histórico contínuo da contestação, com interações em ordem cronológica.
+
+Enquanto estiver em análise, profissional e clínica complementam o mesmo processo. Não são abertas novas contestações para representar novas mensagens sobre o mesmo caso.
 
 ---
 

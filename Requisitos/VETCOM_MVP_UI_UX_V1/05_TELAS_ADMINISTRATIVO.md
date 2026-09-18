@@ -155,12 +155,16 @@ Topo:
 - contexto do período.
 
 Campos:
-- data;
+- data de realização do procedimento;
 - profissional;
 - procedimento;
 - quantidade;
 - valor unitário;
 - observação.
+
+O valor padrão do procedimento deve preencher o valor unitário apenas como sugestão editável. O lançamento deve preservar a quantidade, o valor unitário efetivamente praticado e o valor total.
+
+A data de realização determina a competência, a regra de comissão vigente e a validação de período aberto. A data de criação do registro é somente informação de auditoria.
 
 Bloco de prévia:
 - valor total;
@@ -250,12 +254,14 @@ Comparativo:
 - valor informado/esperado;
 - motivo;
 - descrição;
-- evidência.
+- evidências textuais e complementações.
 
 Histórico:
 - abertura;
 - interações;
 - decisão.
+
+Enquanto não houver decisão final, profissional e clínica devem registrar novas mensagens, justificativas e evidências textuais na mesma contestação, em ordem cronológica. Não haverá anexo de arquivo no primeiro corte do MVP.
 
 Ações:
 - rejeitar;
@@ -307,7 +313,7 @@ Antes de finalizar, mostrar confirmação clara e consequência do bloqueio.
 Topo:
 - título;
 - filtros;
-- ações de exportação.
+- indicação de consulta do período selecionado.
 
 Conteúdo:
 - resumo numérico;
@@ -320,6 +326,8 @@ Relatórios iniciais:
 - produção por procedimento;
 - resumo do período;
 - extrato de comissão.
+
+Os relatórios do primeiro corte são consultivos. A exportação de arquivos fica para evolução futura.
 
 ## 17. Configurações da Clínica
 

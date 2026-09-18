@@ -1,0 +1,35 @@
+ID,Team,Title,Description,Status,Estimate,Priority,Project ID,Project,Creator,Assignee,Labels,Cycle Number,Cycle Name,Cycle Start,Cycle End,Created,Updated,Started,Triaged,Completed,Canceled,Archived,Due Date,Parent issue,Initiatives,Project Milestone ID,Project Milestone,SLA Status,UUID,Time in status (minutes),Related to,Blocked by,Duplicate of
+,,00.1 — Alinhar requisitos UI/UX ao corte aprovado do MVP,"Atualizar os documentos de requisitos e UI/UX para refletir as decisões D07, D09, D12, D13 e D14 registradas em `docs/planos/mvp/00-decisoes-arquiteturais.md`.
+
+## Ajustes obrigatórios
+
+- Remover do primeiro corte a dependência de “Esqueci minha senha” e recuperação automatizada.
+- Remover anexos de arquivo do primeiro corte da contestação, mantendo evidências e complementações textuais.
+- Representar contestação como fluxo contínuo até decisão final, com timeline única.
+- Remover exportação como requisito obrigatório do primeiro corte; relatórios permanecem consultivos.
+- Explicitar que o valor padrão do procedimento é apenas sugestão e que a produção preserva o valor praticado.
+- Explicitar que a data de realização determina competência e regra vigente; data de cadastro é auditoria.
+
+## Arquivos mínimos para revisão
+
+- `Requisitos/VETCOM_MVP_UI_UX_V1/01_REQUISITOS_NEGOCIO_MVP.md`
+- `Requisitos/VETCOM_MVP_UI_UX_V1/02_BASE_UI_UX_APROVADA.md`
+- `Requisitos/VETCOM_MVP_UI_UX_V1/05_TELAS_ADMINISTRATIVO.md`
+- `Requisitos/VETCOM_MVP_UI_UX_V1/06_TELAS_PROFISSIONAL.md`
+- `Requisitos/VETCOM_MVP_UI_UX_V1/08_FORMULARIOS_E_VALIDACOES_UX.md`
+- `Requisitos/VETCOM_MVP_UI_UX_V1/14_MAPA_TELAS_COMPONENTES.md`
+- `Requisitos/VETCOM_MVP_UI_UX_V1/19_CENARIOS_DE_ACEITE_POR_JORNADA.md`
+
+## Critérios de aceite
+
+- Nenhum documento exige autocadastro ou recuperação automatizada no primeiro MVP.
+- Nenhum documento exige upload de arquivo na contestação do primeiro MVP.
+- Interações permanecem na mesma contestação até aprovação ou rejeição.
+- Toda contestação não resolvida bloqueia fechamento.
+- Relatórios do primeiro corte são consultivos.
+- Valor e data efetivos da produção são preservados e usados no histórico.
+- Não existem contradições com D01–D14.
+
+## Fora do escopo
+
+Não implementar código, scripts SQL, contratos HTTP ou telas nesta issue. Entrega exclusivamente documental.",Backlog,3,High,,VetCommission,adriano.luiz.souza@icloud.com,,"mvp, architecture, documentation, ux",,,,,,,,,,,,,,,,,,,,,,

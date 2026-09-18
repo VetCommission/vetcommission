@@ -273,6 +273,7 @@ Exemplos:
 - O valor padrão servirá como sugestão para o lançamento.
 - O valor do lançamento poderá ser diferente do valor padrão quando permitido pela clínica.
 - Alterações no valor padrão não deverão alterar lançamentos históricos.
+- Cada produção deverá preservar a quantidade, o valor unitário efetivamente praticado e o valor total do lançamento.
 
 ## 8.4. Entidades Envolvidas
 
@@ -376,7 +377,7 @@ Registrar cada procedimento efetivamente realizado.
 
 O lançamento deverá conter:
 
-- Data do procedimento.
+- Data de realização do procedimento.
 - Profissional.
 - Procedimento.
 - Quantidade.
@@ -390,7 +391,7 @@ O lançamento deverá conter:
 
 Ao registrar uma produção:
 
-1. O usuário seleciona a data.
+1. O usuário seleciona a data em que o procedimento foi realizado.
 2. Seleciona o profissional.
 3. Seleciona o procedimento.
 4. Informa a quantidade.
@@ -408,6 +409,8 @@ Ao registrar uma produção:
 - O procedimento deverá estar ativo.
 - A quantidade deverá ser maior que zero.
 - O valor deverá ser válido.
+- A data de realização determina a competência, a regra de comissão vigente e a validação de período aberto.
+- A data e hora de cadastro possuem finalidade de auditoria e não alteram a competência da produção.
 - Deverá existir uma regra de comissão aplicável para realizar o cálculo.
 - O lançamento deverá permanecer vinculado à regra efetivamente utilizada.
 - Enquanto o período estiver aberto, o lançamento poderá ser corrigido por usuário autorizado.
@@ -479,6 +482,7 @@ Cada comissão deverá registrar:
 
 - Cada produção deverá possuir o resultado da comissão correspondente.
 - O cálculo deverá utilizar a regra válida na data do procedimento.
+- O cálculo histórico deverá utilizar quantidade, valor unitário e valor total preservados na produção, sem depender do valor padrão atual do procedimento.
 - Alterações futuras na regra não deverão modificar comissões históricas automaticamente.
 - Quando um lançamento for corrigido antes do fechamento, a comissão poderá ser recalculada.
 - Toda alteração relevante deverá manter rastreabilidade.
@@ -651,7 +655,7 @@ O profissional deverá:
 2. Informar o motivo.
 3. Descrever a divergência.
 4. Informar o valor esperado, quando aplicável.
-5. Anexar evidência, quando permitido.
+5. Informar evidência textual, quando necessário.
 6. Enviar a contestação.
 
 ## 14.3. Motivos Iniciais
@@ -673,6 +677,8 @@ Situações mínimas:
 - Aprovada.
 - Rejeitada.
 
+Enquanto estiver em análise, a contestação permanece aberta como um único fluxo contínuo. Profissional e clínica poderão complementar informações, justificativas e evidências textuais no mesmo processo, preservando uma linha do tempo completa e ordenada.
+
 ## 14.5. Análise
 
 O administrador deverá consultar:
@@ -683,7 +689,7 @@ O administrador deverá consultar:
 - Descrição.
 - Valor original.
 - Valor informado pelo profissional.
-- Evidências.
+- Evidências textuais e complementações.
 - Histórico da solicitação.
 
 O administrador poderá:
@@ -691,6 +697,7 @@ O administrador poderá:
 - Aprovar.
 - Rejeitar.
 - Registrar justificativa.
+- Solicitar ou registrar complementações textuais enquanto a contestação estiver em análise.
 
 ## 14.6. Contestação Aprovada
 
@@ -714,8 +721,12 @@ A contestação deverá ser encerrada mantendo:
 ## 14.8. Regras de Negócio
 
 - Somente lançamentos do próprio profissional poderão ser contestados.
+- Cada produção poderá possuir somente uma contestação em andamento.
+- Novas interações sobre o mesmo caso deverão ser registradas na contestação original, sem criar outra contestação.
 - Não será permitida nova alteração normal em período já fechado.
-- O fechamento não deverá ocorrer enquanto existirem contestações que a clínica considere impeditivas.
+- O fechamento não deverá ocorrer enquanto existir qualquer contestação ainda não resolvida.
+- A contestação somente deixa de bloquear o fechamento depois da decisão final `Aprovada` ou `Rejeitada`.
+- Arquivos anexados não fazem parte do primeiro corte do MVP.
 - Toda decisão deverá manter histórico.
 
 ## 14.9. Entidades Envolvidas
@@ -810,9 +821,7 @@ Após o fechamento:
 
 ## 16.1. Escopo do MVP
 
-O pagamento financeiro em si não faz parte do núcleo obrigatório do MVP.
-
-Caso a clínica deseje controlar essa informação, o sistema poderá permitir apenas registrar que determinado fechamento foi pago.
+O registro de pagamento não faz parte do primeiro corte operacional do MVP. Esta seção permanece documentada apenas como evolução futura.
 
 ## 16.2. Informações Mínimas
 
@@ -891,6 +900,8 @@ O dashboard utilizará informações consolidadas de:
 
 Permitir que a clínica consulte informações consolidadas e detalhadas.
 
+No primeiro corte, os relatórios serão consultivos. Exportação de arquivos será tratada em evolução futura.
+
 ## 18.2. Relatórios do MVP
 
 ### Comissões por Profissional
@@ -967,7 +978,7 @@ O sistema deverá manter histórico de ações como:
 - Aprovação de contestação.
 - Rejeição de contestação.
 - Fechamento de período.
-- Registro de pagamento, quando utilizado.
+- Registro de pagamento, somente em evolução futura.
 
 ## 19.3. Informações Mínimas
 
@@ -1121,7 +1132,7 @@ Representa o agrupamento mensal dos lançamentos.
 
 ## 21.13. Pagamento
 
-Representa somente o registro de pagamento, quando utilizado.
+Entidade prevista somente para evolução futura e fora do primeiro corte operacional do MVP.
 
 ---
 
@@ -1150,7 +1161,7 @@ Clínica
  │    └── Histórico da Contestação
  ├── Períodos de Fechamento
  │    └── Comissões / Produções
- ├── Pagamentos
+ ├── Pagamentos (evolução futura)
  └── Auditoria
 ```
 
@@ -1173,7 +1184,7 @@ Contestação (opcional)
      ↓
 Fechamento
      ↓
-Pagamento (opcional)
+Pagamento (evolução futura; fora do primeiro corte)
 ```
 
 ---
@@ -1238,7 +1249,7 @@ Alterações em cadastros ou regras não poderão modificar automaticamente resu
 
 ## RN-003 — Regra Vigente
 
-A comissão deverá utilizar a regra válida na data do procedimento.
+A comissão deverá utilizar a regra válida na data em que o procedimento foi realizado.
 
 ---
 
@@ -1274,13 +1285,13 @@ Um período fechado será somente consultivo no fluxo normal.
 
 ## RN-009 — Contestação
 
-O profissional somente poderá contestar lançamentos próprios.
+O profissional somente poderá contestar lançamentos próprios. Cada caso deverá permanecer em uma única contestação contínua até sua resolução final, com todas as interações registradas no mesmo histórico.
 
 ---
 
 ## RN-010 — Contestação e Fechamento
 
-Contestações pendentes deverão ser consideradas antes da conclusão do fechamento.
+Toda contestação ainda não resolvida bloqueará a conclusão do fechamento. Somente decisões finais `Aprovada` ou `Rejeitada` removem esse bloqueio.
 
 ---
 

@@ -20,10 +20,11 @@ Elementos:
 - e-mail;
 - senha;
 - lembrar de mim;
-- recuperar senha;
 - entrar.
 
 A imagem de apoio deve reforçar o contexto veterinário, mas não competir com o formulário.
+
+O primeiro corte não possui autocadastro público nem recuperação automatizada de senha. Somente usuários previamente cadastrados e ativos podem autenticar.
 
 ## 3. Primeiro acesso / Boas-vindas
 
@@ -127,7 +128,7 @@ Campos:
 - motivo;
 - descrição;
 - valor esperado quando aplicável;
-- evidência opcional.
+- evidência textual opcional.
 
 Ação:
 - enviar contestação.
@@ -159,12 +160,15 @@ Corpo:
 - descrição;
 - valor original;
 - valor esperado;
-- evidência.
+- evidências textuais e complementações.
 
 Histórico:
 - enviada;
+- mensagens, justificativas e complementações em ordem cronológica;
 - recebida/analisada;
 - decisão.
+
+Todas as interações sobre o mesmo caso permanecem vinculadas à contestação original até a resolução final. Não haverá anexo de arquivo no primeiro corte do MVP.
 
 Se decidida:
 - justificativa da clínica.
