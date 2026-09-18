@@ -27,6 +27,37 @@ O repositório contém os contratos de arquitetura, requisitos de produto/UI/UX,
 
 Consulte [scriptsPS/README.md](scriptsPS/README.md) para os comandos disponíveis.
 
+## Acesso local ao sistema
+
+Com PostgreSQL, API e frontend em execucao, abra:
+
+```text
+http://localhost:3000/login
+```
+
+O usuario inicial previsto pelo script de banco e:
+
+```text
+E-mail: admin@vetcommission.local
+```
+
+No primeiro MVP nao existe autocadastro publico nem recuperacao automatizada de senha. O usuario precisa estar previamente cadastrado, ativo e vinculado a um tenant.
+
+### Senha inicial de desenvolvimento
+
+Para facilitar os testes locais, o script `database/scripts/V004__provision_development_admin_password.sql` define a senha `qwas` para o administrador inicial e grava somente o hash PBKDF2 compativel com `Pbkdf2PasswordHasher`.
+
+Essa senha e exclusiva do ambiente local e nao deve ser usada em homologacao ou producao. Em ambientes compartilhados, substitua o hash por uma credencial provisionada de forma segura.
+
+Depois do provisionamento:
+
+1. Inicie os servicos com `scriptsPS/01-Restart-Backend-Frontend.ps1`.
+2. Acesse `http://localhost:3000/login`.
+3. Informe `admin@vetcommission.local` e a senha provisionada.
+4. Apos autenticar, acesse a area administrativa em `http://localhost:3000/app`.
+
+O backend expoe os endpoints de sessao em `POST http://localhost:5077/api/auth/login` e `GET http://localhost:5077/api/auth/me`.
+
 ## Processo de desenvolvimento
 
 Cada fatia do MVP deve seguir, quando houver persistência:

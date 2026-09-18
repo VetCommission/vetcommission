@@ -10,6 +10,20 @@ Execute os scripts a partir da raiz do repositório. Pré-requisitos:
 
 ## Iniciar os componentes
 
+Para parar processos que estejam usando as portas da API e do frontend e iniciar novamente os dois servicos:
+
+```powershell
+.\scriptsPS\01-Restart-Backend-Frontend.ps1
+```
+
+O script encerra o processo que estiver escutando a porta `5077` (API) e a porta `3000` (frontend), garante o PostgreSQL local via Docker Compose e inicia os dois servicos em segundo plano.
+
+Se o PostgreSQL ja estiver sendo executado por outro meio:
+
+```powershell
+.\scriptsPS\01-Restart-Backend-Frontend.ps1 -SkipDatabase
+```
+
 Em terminais separados:
 
 ```powershell

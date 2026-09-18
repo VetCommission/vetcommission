@@ -28,6 +28,16 @@ try
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddControllers();
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("FrontendLocal", policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
     builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
@@ -81,6 +91,7 @@ try
     {
         app.UseHttpsRedirection();
     }
+    app.UseCors("FrontendLocal");
     app.UseAuthentication();
     app.UseAuthorization();
 
