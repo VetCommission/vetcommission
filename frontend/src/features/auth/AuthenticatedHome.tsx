@@ -1,7 +1,6 @@
 "use client";
 
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import PetsRoundedIcon from "@mui/icons-material/PetsRounded";
 import {
   AppBar,
   Box,
@@ -17,6 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "./AuthProvider";
 import { useTenant } from "./TenantProvider";
 
@@ -38,7 +38,7 @@ export function AuthenticatedHome({ area }: AuthenticatedHomeProps) {
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       <AppBar color="inherit" elevation={0} position="static">
         <Toolbar sx={{ gap: 2 }}>
-          <PetsRoundedIcon color="primary" />
+          <Image alt="VetCommission" height={34} src="/assets/brand/vetcom-mark.svg" width={34} />
           <Box sx={{ flexGrow: 1 }}>
             <Typography sx={{ fontWeight: 700 }}>VetCommission</Typography>
             <Typography color="text.secondary" variant="caption">

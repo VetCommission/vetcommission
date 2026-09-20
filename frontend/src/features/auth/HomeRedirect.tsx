@@ -2,6 +2,7 @@
 
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import { Box, Button, Chip, Container, Paper, Stack, Typography } from "@mui/material";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -31,7 +32,7 @@ export function HomeRedirect() {
         <Stack spacing={3}>
           <Box>
             <Typography component="p" color="primary" gutterBottom sx={{ fontWeight: 700 }}>
-              VetCommission
+              <Image alt="VetCommission" height={48} src="/assets/brand/vetcom-logo.svg" width={190} />
             </Typography>
             <Typography color="text.secondary" variant="overline">
               Landing page institucional

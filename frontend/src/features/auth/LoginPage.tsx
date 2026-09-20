@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -71,18 +72,63 @@ export function LoginPage() {
   }
 
   return (
-    <Container component="main" maxWidth="sm" sx={{ py: { xs: 5, md: 9 } }}>
-      <Paper variant="outlined" sx={{ p: { xs: 3, md: 5 } }}>
-        <Stack component="form" noValidate spacing={3} onSubmit={handleSubmit(onSubmit)}>
+    <Container component="main" maxWidth={false} disableGutters sx={{ minHeight: "100vh" }}>
+      <Paper
+        square
+        variant="outlined"
+        sx={{ border: 0, borderRadius: 0, minHeight: "100vh", overflow: "hidden" }}
+      >
+        <Stack direction={{ xs: "column", md: "row" }} sx={{ minHeight: "100vh" }}>
+          <Box
+            sx={{
+              display: { xs: "none", md: "block" },
+              minHeight: "100vh",
+              position: "relative",
+              borderRadius: 0,
+              width: { md: "60%", lg: "65%" },
+              "&::after": {
+                background:
+                  "linear-gradient(115deg, rgba(7, 45, 35, 0.82) 0%, rgba(19, 105, 79, 0.55) 48%, rgba(19, 105, 79, 0.08) 100%)",
+                content: '""',
+                inset: 0,
+                position: "absolute",
+              },
+            }}
+          >
+            <Image
+              alt="Profissional veterinária em uma clínica"
+              fill
+              priority
+              sizes="65vw"
+              src="/assets/images/login-veterinary.webp"
+              style={{ borderRadius: 0, objectFit: "cover" }}
+            />
+          </Box>
+          <Stack
+            component="form"
+            noValidate
+            onSubmit={handleSubmit(onSubmit)}
+            spacing={3}
+            sx={{
+              bgcolor: "background.paper",
+              flex: 1,
+              justifyContent: "center",
+              maxWidth: { md: 560, lg: 620 },
+              p: { xs: 3, sm: 5, lg: 8 },
+              width: { md: "40%", lg: "35%" },
+            }}
+          >
           <Box>
-            <Typography component="p" color="primary" gutterBottom sx={{ fontWeight: 700 }}>
-              VetCommission
+            <Typography
+              component="p"
+              color="primary"
+              gutterBottom
+              sx={{ fontWeight: 700, mb: 4, textAlign: "center" }}
+            >
+              <Image alt="VetCommission" height={64} src="/assets/brand/vetcom-logo.svg" width={255} />
             </Typography>
-            <Typography component="h1" variant="h4">
-              Entrar no sistema
-            </Typography>
-            <Typography color="text.secondary" sx={{ mt: 1 }}>
-              Acesso exclusivo para usuários previamente cadastrados pela clínica.
+            <Typography color="text.secondary" sx={{ mt: "10%" }}>
+              Entre para continuar.
             </Typography>
           </Box>
 
@@ -95,6 +141,7 @@ export function LoginPage() {
             helperText={errors.email?.message}
             label="E-mail"
             type="email"
+            sx={{ alignSelf: "center", width: "100%", maxWidth: 520 }}
             {...register("email")}
           />
 
@@ -104,6 +151,7 @@ export function LoginPage() {
             helperText={errors.senha?.message}
             label="Senha"
             type="password"
+            sx={{ alignSelf: "center", width: "100%", maxWidth: 520 }}
             {...register("senha")}
           />
 
@@ -113,13 +161,12 @@ export function LoginPage() {
             startIcon={<LoginRoundedIcon />}
             type="submit"
             variant="contained"
+            sx={{ alignSelf: "center", width: "100%", maxWidth: 520 }}
           >
             Entrar
           </Button>
 
-          <Alert severity="info">
-            O MVP não possui autocadastro público nem recuperação automatizada de senha.
-          </Alert>
+          </Stack>
         </Stack>
       </Paper>
     </Container>

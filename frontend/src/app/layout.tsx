@@ -8,6 +8,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "VetCommission",
+  icons: {
+    icon: "/assets/brand/favicon.svg",
+    shortcut: "/assets/brand/favicon-32.png",
+    apple: "/assets/brand/favicon-512.png",
+  },
   description: "Gestão transparente de produção e comissões veterinárias.",
 };
 
