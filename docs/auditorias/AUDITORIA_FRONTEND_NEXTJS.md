@@ -448,14 +448,14 @@ Esta seção substitui as conclusões conflitantes do diagnóstico inicial para 
 ### Status atualizado dos achados
 
 - `FRONT-001`: **resolvido tecnicamente**. A policy consulta usuário, tenant e recurso no banco em `src/VetCommission.WebApi/Auth/AccessResourceAuthorizationHandler.cs:19-30`; os testes de isolamento cobrem header arbitrário, tenant inválido, recurso cruzado e vínculos de usuário.
-- `FRONT-002`: **parcialmente resolvido**. Query keys de profissionais, funções e especialidades passaram a incluir tenant; queries recebem `enabled` e `AbortSignal`. Paginação e filtros na URL continuam pendentes.
+- `FRONT-002`: **parcialmente resolvido**. Query keys de profissionais, funções e especialidades passaram a incluir tenant; queries recebem `enabled` e `AbortSignal`. A remoção de cache de tenant anterior está implementada; faltam testes frontend para validar a troca durante requests em voo.
 - `FRONT-003`: **resolvido tecnicamente**. Logout e falha de `/auth/me` cancelam/limpam o `QueryClient` em `frontend/src/features/auth/AuthProvider.tsx:50-64`; troca de tenant remove queries de outros tenants em `TenantProvider.tsx:54-65`.
-- `FRONT-004`: **aberto — alto**. Access token ainda está em `localStorage` em `frontend/src/features/auth/authStorage.ts`; depende da ADR e da decisão de topologia da tarefa 5.
+- `FRONT-004`: **aceito temporariamente / fora do escopo desta etapa**. O access token permanece em `localStorage` em `frontend/src/features/auth/authStorage.ts`, por decisão explícita do responsável pelo projeto. A migração para cookie `HttpOnly` continua recomendada como iniciativa futura.
 - `FRONT-005`: **aberto — alto**. Testes frontend seguem adiados; os testes backend não substituem cobertura de guards, formulários, cache e UI.
 - `FRONT-006`: **aberto — alto**. Não há `.github/workflows` nem checks obrigatórios.
 - `FRONT-007`: **parcialmente resolvido**. Foram criados `src/app/loading.tsx`, `error.tsx`, `global-error.tsx` e `not-found.tsx`; a tela de detalhe ainda precisa distinguir erro de API e registro inexistente com `notFound()`.
 - `FRONT-008`: **aberto — médio**. Páginas e features ainda possuem fronteiras cliente amplas.
-- `FRONT-009`: **parcialmente resolvido**. Cancelamento foi propagado ao Axios; debounce, paginação, ordenação e estado reproduzível na URL permanecem pendentes.
+- `FRONT-009`: **parcialmente resolvido**. A listagem de profissionais agora possui paginação server-side, limites, ordenação determinística, query keys com parâmetros, debounce de busca, cancelamento e estado em `searchParams`; funções/especialidades ainda não usam contrato paginado comum.
 - `FRONT-010`: **parcialmente resolvido**. `MasterDataForm` agora trata erro geral e `isSubmitting`; mapeamento de erros por campo e padronização de todos os formulários permanecem pendentes.
 - `FRONT-011`: **aberto — médio**. Selects e foco/axe ainda não foram auditados dinamicamente.
 - `FRONT-012`: **aberto — médio**. Ativação/inativação de profissional ainda não exige confirmação.
@@ -472,6 +472,20 @@ Esta seção substitui as conclusões conflitantes do diagnóstico inicial para 
 
 ### Classificação corrente
 
-**Nota atual estimada: 6,3/10 — parcialmente conforme.** A autorização de API, isolamento de cache e boundaries básicos melhoraram, mas a base ainda não está pronta para produção devido a token em `localStorage`, ausência de testes frontend, CI, E2E, paginação/URL e validação de deploy.
+**Nota atual estimada: 6,8/10 — parcialmente conforme.** A autorização de API, isolamento de cache, paginação de profissionais e boundaries básicos melhoraram. O token em `localStorage` permanece como risco aceito temporariamente; continuam pendentes testes frontend, CI, E2E, cobertura de paginação nas demais listas e validação de deploy.
 
-**Bloqueadores atuais de produção:** `FRONT-004`, `FRONT-005`, `FRONT-006` e a ausência de confirmação operacional da topologia de cookies/CSRF. **Bloqueadores para novas funcionalidades multi-tenant:** autenticação segura, testes frontend e CI. Nenhum arquivo de tabela genérica ou evolução de toast foi incluído.
+**Bloqueadores atuais de produção:** `FRONT-005`, `FRONT-006` e a ausência de validação E2E/operacional. `FRONT-004` permanece como risco aceito temporariamente, não como bloqueador desta etapa. **Bloqueadores para novas funcionalidades multi-tenant:** testes frontend e CI. Nenhum arquivo de tabela genérica ou evolução de toast foi incluído.
+
+### Adequações adicionais — paginação, features e ações destrutivas
+
+- A listagem de profissionais mantém paginação server-side, filtros na URL e cancelamento.
+- As listas de funções e especialidades agora usam o mesmo contrato `PagedResult<T>`, paginação server-side, limites de tamanho e estado de página na URL.
+- As APIs de funções e especialidades foram movidas para `features/professional-roles/professionalRolesApi.ts` e `features/professional-specialties/professionalSpecialtiesApi.ts`; `professionalsApi.ts` ficou restrito ao domínio de profissionais.
+- Os tipos de autenticação estão em `features/auth/authTypes.ts`, os tipos de profissionais em `features/professionals/professionalTypes.ts`, os tipos de funções/especialidades em suas respectivas APIs de feature e a paginação transversal em `src/types/pagination.ts`; o antigo `src/types/api.ts` foi removido.
+- As páginas de composição das listagens e cadastros não possuem mais `use client`; a interatividade permanece nas features.
+- Ativar/inativar profissional agora exige confirmação explícita e desabilita a ação durante o processamento em `ProfessionalsList.tsx`.
+- O contrato paginado comum está aplicado às três listas atualmente existentes: profissionais, funções e especialidades.
+- O Prettier foi configurado com `format`, `format:check`, `.prettierrc.json` e `.prettierignore`.
+- Validação após estas alterações: lint passou, build passou e testes unitários backend permaneceram em 21/21.
+
+**Nota corrente:** 7,3/10 — parcialmente conforme. As listas existentes agora compartilham contrato paginado e a formatação é validável no CI; testes frontend, CI e E2E continuam pendentes.

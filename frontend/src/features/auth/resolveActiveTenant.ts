@@ -1,4 +1,4 @@
-import type { AuthTenant } from "@/types/api";
+import type { AuthTenant } from "./authTypes";
 
 export function resolveActiveTenantId(tenants: AuthTenant[], preferredTenantId: string | null) {
   if (preferredTenantId && tenants.some((tenant) => tenant.tenantId === preferredTenantId)) {

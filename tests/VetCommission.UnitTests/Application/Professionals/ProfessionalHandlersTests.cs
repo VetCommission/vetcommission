@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NSubstitute;
 using VetCommission.Application.Common.Errors;
+using VetCommission.Application.Common.Results;
 using VetCommission.Application.Features.Auth;
 using VetCommission.Application.Features.Auth.Tenant;
 using VetCommission.Application.Features.Professionals;
@@ -101,7 +102,7 @@ public sealed class ProfessionalHandlersTests
         public ProfessionalRecord? Record { get; init; }
         public bool? LastActiveValue { get; private set; }
 
-        public Task<IReadOnlyCollection<ProfessionalRecord>> ListAsync(Guid tenantId, string? search, string? role, bool? active, CancellationToken cancellationToken) => Task.FromResult<IReadOnlyCollection<ProfessionalRecord>>(Record is null ? [] : [Record]);
+        public Task<PagedResult<ProfessionalRecord>> ListAsync(Guid tenantId, int page, int pageSize, string? search, string? role, bool? active, CancellationToken cancellationToken) => Task.FromResult(new PagedResult<ProfessionalRecord>(Record is null ? [] : [Record], page, pageSize, Record is null ? 0 : 1));
         public Task<ProfessionalRecord?> GetAsync(Guid tenantId, Guid id, CancellationToken cancellationToken) => Task.FromResult(Record);
         public Task<bool> EmailExistsAsync(Guid tenantId, string email, Guid? excludingId, CancellationToken cancellationToken) => Task.FromResult(EmailExists);
         public Task<ProfessionalRecord> CreateAsync(Guid tenantId, CreateProfessionalCommand command, CancellationToken cancellationToken)

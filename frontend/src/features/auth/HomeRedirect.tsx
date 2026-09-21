@@ -32,7 +32,12 @@ export function HomeRedirect() {
         <Stack spacing={3}>
           <Box>
             <Typography component="p" color="primary" gutterBottom sx={{ fontWeight: 700 }}>
-              <Image alt="VetCommission" height={48} src="/assets/brand/vetcom-logo.svg" width={190} />
+              <Image
+                alt="VetCommission"
+                height={48}
+                src="/assets/brand/vetcom-logo.svg"
+                width={190}
+              />
             </Typography>
             <Typography color="text.secondary" variant="overline">
               Landing page institucional
@@ -43,8 +48,8 @@ export function HomeRedirect() {
           </Box>
 
           <Typography color="text.secondary">
-            Estrutura técnica inicial para a API, o Worker e o portal web. Entre com um
-            usuário previamente cadastrado para acessar o MVP.
+            Estrutura técnica inicial para a API, o Worker e o portal web. Entre com um usuário
+            previamente cadastrado para acessar o MVP.
           </Typography>
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>

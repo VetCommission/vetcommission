@@ -1,5 +1,7 @@
 import axios from "axios";
-import type { ApiErrorEnvelope, ApiErrorItem } from "@/types/api";
+
+type ApiErrorItem = { code: string; message: string; field?: string | null };
+type ApiErrorEnvelope = { errors: ApiErrorItem[] };
 
 const fallbackError: ApiErrorItem = {
   code: "Unexpected",

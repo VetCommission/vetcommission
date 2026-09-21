@@ -11,7 +11,7 @@ import {
 } from "react";
 import { setApiTenantId } from "@/lib/api/apiClient";
 import { useQueryClient } from "@tanstack/react-query";
-import type { AuthTenant } from "@/types/api";
+import type { AuthTenant } from "./authTypes";
 import { useAuth } from "./AuthProvider";
 import { resolveActiveTenantId } from "./resolveActiveTenant";
 import { clearStoredTenantId, readStoredTenantId, storeTenantId } from "./tenantStorage";
@@ -31,7 +31,9 @@ export function TenantProvider({ children }: PropsWithChildren) {
   const { session, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   const tenants = useMemo(() => session?.tenants ?? [], [session?.tenants]);
-  const [selectedTenantId, setSelectedTenantId] = useState<string | null>(() => readStoredTenantId());
+  const [selectedTenantId, setSelectedTenantId] = useState<string | null>(() =>
+    readStoredTenantId(),
+  );
   const activeTenantId = useMemo(
     () => (isAuthenticated ? resolveActiveTenantId(tenants, selectedTenantId) : null),
     [isAuthenticated, selectedTenantId, tenants],
@@ -61,7 +63,9 @@ export function TenantProvider({ children }: PropsWithChildren) {
 
       setSelectedTenantId(tenantId);
       void queryClient.cancelQueries();
-      queryClient.removeQueries({ predicate: (query) => query.queryKey[0] === "tenant" && query.queryKey[1] !== tenantId });
+      queryClient.removeQueries({
+        predicate: (query) => query.queryKey[0] === "tenant" && query.queryKey[1] !== tenantId,
+      });
       setApiTenantId(tenantId);
       storeTenantId(tenantId);
     },

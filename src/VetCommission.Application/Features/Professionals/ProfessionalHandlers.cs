@@ -11,13 +11,14 @@ internal static class ProfessionalMapping
     public static ProfessionalDto ToDto(ProfessionalRecord record) => new(record.Id, record.TenantId, record.UserId, record.Name, record.Email, record.Phone, record.Role, record.ProfessionalRegistration, record.Specialty, record.Active, record.CreatedAtUtc, record.UpdatedAtUtc, record.InactivatedAtUtc);
 }
 
-public sealed class ListProfessionalsHandler(IProfessionalRepository repository, ITenantContext tenant) : IRequestHandler<ListProfessionalsQuery, NotificationResult<IReadOnlyCollection<ProfessionalDto>>>
+public sealed class ListProfessionalsHandler(IProfessionalRepository repository, ITenantContext tenant) : IRequestHandler<ListProfessionalsQuery, NotificationResult<PagedResult<ProfessionalDto>>>
 {
-    public async Task<NotificationResult<IReadOnlyCollection<ProfessionalDto>>> Handle(ListProfessionalsQuery request, CancellationToken cancellationToken)
+    public async Task<NotificationResult<PagedResult<ProfessionalDto>>> Handle(ListProfessionalsQuery request, CancellationToken cancellationToken)
     {
-        if (tenant.TenantId is not Guid tenantId) return NotificationResult<IReadOnlyCollection<ProfessionalDto>>.Failure(new NotificationError(ErrorCodes.Forbidden, "Tenant ativo obrigatorio."));
-        var records = await repository.ListAsync(tenantId, request.Search, request.Role, request.Active, cancellationToken);
-        return NotificationResult<IReadOnlyCollection<ProfessionalDto>>.Success(records.Select(ProfessionalMapping.ToDto).ToArray());
+        if (tenant.TenantId is not Guid tenantId) return NotificationResult<PagedResult<ProfessionalDto>>.Failure(new NotificationError(ErrorCodes.Forbidden, "Tenant ativo obrigatorio."));
+        if (request.Page < 1 || request.PageSize is < 1 or > 100) return NotificationResult<PagedResult<ProfessionalDto>>.Failure(new NotificationError(ErrorCodes.Validation, "Pagina ou tamanho invalidos."));
+        var result = await repository.ListAsync(tenantId, request.Page, request.PageSize, request.Search, request.Role, request.Active, cancellationToken);
+        return NotificationResult<PagedResult<ProfessionalDto>>.Success(new(result.Items.Select(ProfessionalMapping.ToDto).ToArray(), result.Page, result.PageSize, result.TotalItems));
     }
 }
 

@@ -1,4 +1,4 @@
-import type { AuthTenant } from "@/types/api";
+import type { AuthTenant } from "./authTypes";
 import type { AccessResource } from "./accessResources";
 
 export function tenantHasAccess(tenant: AuthTenant | null, resource: AccessResource) {

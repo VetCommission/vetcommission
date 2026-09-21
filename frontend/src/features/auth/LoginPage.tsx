@@ -2,16 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
-import {
-  Alert,
-  Box,
-  Button,
-  Container,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Container, Paper, Stack, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
@@ -118,54 +109,58 @@ export function LoginPage() {
               width: { md: "40%", lg: "35%" },
             }}
           >
-          <Box>
-            <Typography
-              component="p"
-              color="primary"
-              gutterBottom
-              sx={{ fontWeight: 700, mb: 4, textAlign: "center" }}
+            <Box>
+              <Typography
+                component="p"
+                color="primary"
+                gutterBottom
+                sx={{ fontWeight: 700, mb: 4, textAlign: "center" }}
+              >
+                <Image
+                  alt="VetCommission"
+                  height={64}
+                  src="/assets/brand/vetcom-logo.svg"
+                  width={255}
+                />
+              </Typography>
+              <Typography color="text.secondary" sx={{ mt: "10%" }}>
+                Entre para continuar.
+              </Typography>
+            </Box>
+
+            {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
+
+            <TextField
+              autoComplete="email"
+              autoFocus
+              error={Boolean(errors.email)}
+              helperText={errors.email?.message}
+              label="E-mail"
+              type="email"
+              sx={{ alignSelf: "center", width: "100%", maxWidth: 520 }}
+              {...register("email")}
+            />
+
+            <TextField
+              autoComplete="current-password"
+              error={Boolean(errors.senha)}
+              helperText={errors.senha?.message}
+              label="Senha"
+              type="password"
+              sx={{ alignSelf: "center", width: "100%", maxWidth: 520 }}
+              {...register("senha")}
+            />
+
+            <Button
+              disabled={isSubmitting || isLoading}
+              size="large"
+              startIcon={<LoginRoundedIcon />}
+              type="submit"
+              variant="contained"
+              sx={{ alignSelf: "center", width: "100%", maxWidth: 520 }}
             >
-              <Image alt="VetCommission" height={64} src="/assets/brand/vetcom-logo.svg" width={255} />
-            </Typography>
-            <Typography color="text.secondary" sx={{ mt: "10%" }}>
-              Entre para continuar.
-            </Typography>
-          </Box>
-
-          {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
-
-          <TextField
-            autoComplete="email"
-            autoFocus
-            error={Boolean(errors.email)}
-            helperText={errors.email?.message}
-            label="E-mail"
-            type="email"
-            sx={{ alignSelf: "center", width: "100%", maxWidth: 520 }}
-            {...register("email")}
-          />
-
-          <TextField
-            autoComplete="current-password"
-            error={Boolean(errors.senha)}
-            helperText={errors.senha?.message}
-            label="Senha"
-            type="password"
-            sx={{ alignSelf: "center", width: "100%", maxWidth: 520 }}
-            {...register("senha")}
-          />
-
-          <Button
-            disabled={isSubmitting || isLoading}
-            size="large"
-            startIcon={<LoginRoundedIcon />}
-            type="submit"
-            variant="contained"
-            sx={{ alignSelf: "center", width: "100%", maxWidth: 520 }}
-          >
-            Entrar
-          </Button>
-
+              Entrar
+            </Button>
           </Stack>
         </Stack>
       </Paper>

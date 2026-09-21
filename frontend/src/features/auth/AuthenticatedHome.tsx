@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { useAuth } from "./AuthProvider";
 import { useTenant } from "./TenantProvider";
 import { accessResources } from "./accessResources";
@@ -87,17 +88,17 @@ export function AuthenticatedHome({ area }: AuthenticatedHomeProps) {
                 </Select>
               </FormControl>
               {tenantHasAccess(activeTenant, accessResources.professionalsManage) ? (
-                <Button variant="outlined" onClick={() => router.push("/app/profissionais")}>
+                <Button component={Link} href="/app/profissionais" variant="outlined">
                   Profissionais
                 </Button>
               ) : null}
               {tenantHasAccess(activeTenant, accessResources.professionalRolesManage) ? (
-                <Button variant="outlined" onClick={() => router.push("/app/funcoes-cargos")}>
+                <Button component={Link} href="/app/funcoes-cargos" variant="outlined">
                   Funções e cargos
                 </Button>
               ) : null}
               {tenantHasAccess(activeTenant, accessResources.professionalSpecialtiesManage) ? (
-                <Button variant="outlined" onClick={() => router.push("/app/especialidades")}>
+                <Button component={Link} href="/app/especialidades" variant="outlined">
                   Especialidades
                 </Button>
               ) : null}
@@ -110,8 +111,8 @@ export function AuthenticatedHome({ area }: AuthenticatedHomeProps) {
                 Base autenticada pronta
               </Typography>
               <Typography color="text.secondary">
-                Login, sessão, tenant ativo, permissões e proteção de rotas estão prontos para
-                as próximas etapas do MVP.
+                Login, sessão, tenant ativo, permissões e proteção de rotas estão prontos para as
+                próximas etapas do MVP.
               </Typography>
             </Stack>
           </Paper>

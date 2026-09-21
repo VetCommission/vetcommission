@@ -13,7 +13,23 @@ import { ProfessionalForm } from "@/features/professionals/ProfessionalForm";
 export default function ProfessionalDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const { activeTenantId } = useTenant();
-  const query = useQuery({ queryKey: activeTenantId ? professionalQueryKeys.detail(activeTenantId, id) : ["tenantless", "professional", id], queryFn: ({ signal }) => getProfessional(id, signal), enabled: Boolean(activeTenantId) });
+  const query = useQuery({
+    queryKey: activeTenantId
+      ? professionalQueryKeys.detail(activeTenantId, id)
+      : ["tenantless", "professional", id],
+    queryFn: ({ signal }) => getProfessional(id, signal),
+    enabled: Boolean(activeTenantId),
+  });
 
-  return <RequireAcesso recurso={accessResources.professionalsManage}><Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>{query.isLoading ? <CircularProgress /> : query.data ? <ProfessionalForm initialMode="view" professional={query.data} /> : null}</Container></RequireAcesso>;
+  return (
+    <RequireAcesso recurso={accessResources.professionalsManage}>
+      <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>
+        {query.isLoading ? (
+          <CircularProgress />
+        ) : query.data ? (
+          <ProfessionalForm initialMode="view" professional={query.data} />
+        ) : null}
+      </Container>
+    </RequireAcesso>
+  );
 }

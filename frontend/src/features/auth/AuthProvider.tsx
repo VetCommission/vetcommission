@@ -11,13 +11,9 @@ import {
 } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clearApiSession, setApiAccessToken } from "@/lib/api/apiClient";
-import type { AuthSession, CurrentSession, LoginRequest } from "@/types/api";
+import type { AuthSession, CurrentSession, LoginRequest } from "./authTypes";
 import { getCurrentSession, login as loginRequest } from "./authApi";
-import {
-  clearStoredAccessToken,
-  readStoredAccessToken,
-  storeAccessToken,
-} from "./authStorage";
+import { clearStoredAccessToken, readStoredAccessToken, storeAccessToken } from "./authStorage";
 
 type AuthContextValue = {
   session: CurrentSession | null;
@@ -85,7 +81,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     () => ({
       session: currentSessionQuery.data ?? null,
       accessToken,
-      isAuthenticated: Boolean(accessToken && currentSessionQuery.data && !currentSessionQuery.isError),
+      isAuthenticated: Boolean(
+        accessToken && currentSessionQuery.data && !currentSessionQuery.isError,
+      ),
       isLoading: currentSessionQuery.isLoading || loginMutation.isPending,
       login,
       logout: clearSession,

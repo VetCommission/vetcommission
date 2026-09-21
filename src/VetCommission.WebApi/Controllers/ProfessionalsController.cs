@@ -13,8 +13,8 @@ namespace VetCommission.WebApi.Controllers;
 public sealed class ProfessionalsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? busca, [FromQuery] string? funcao, [FromQuery] bool? ativo, CancellationToken cancellationToken) =>
-        (await mediator.Send(new ListProfessionalsQuery(busca, funcao, ativo), cancellationToken)).ToActionResult(this);
+    public async Task<IActionResult> List([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? busca = null, [FromQuery] string? funcao = null, [FromQuery] bool? ativo = null, CancellationToken cancellationToken = default) =>
+        (await mediator.Send(new ListProfessionalsQuery(page, pageSize, busca, funcao, ativo), cancellationToken)).ToActionResult(this);
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken) =>

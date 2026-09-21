@@ -7,11 +7,12 @@ public sealed record ProfessionalDto(
     string Role, string? ProfessionalRegistration, string? Specialty, bool Active,
     DateTime CreatedAtUtc, DateTime? UpdatedAtUtc, DateTime? InactivatedAtUtc);
 
-public sealed record ProfessionalListQuery(string? Search, string? Role, bool? Active);
+
+public sealed record ProfessionalListQuery(int Page, int PageSize, string? Search, string? Role, bool? Active);
 public sealed record CreateProfessionalCommand(string Name, string? Email, string? Phone, string Role, string? ProfessionalRegistration, string? Specialty, Guid? UserId) : MediatR.IRequest<NotificationResult<ProfessionalDto>>;
 public sealed record UpdateProfessionalCommand(Guid Id, string Name, string? Email, string? Phone, string Role, string? ProfessionalRegistration, string? Specialty, Guid? UserId) : MediatR.IRequest<NotificationResult<ProfessionalDto>>;
 public sealed record GetProfessionalQuery(Guid Id) : MediatR.IRequest<NotificationResult<ProfessionalDto>>;
-public sealed record ListProfessionalsQuery(string? Search, string? Role, bool? Active) : MediatR.IRequest<NotificationResult<IReadOnlyCollection<ProfessionalDto>>>;
+public sealed record ListProfessionalsQuery(int Page, int PageSize, string? Search, string? Role, bool? Active) : MediatR.IRequest<NotificationResult<PagedResult<ProfessionalDto>>>;
 public sealed record SetProfessionalActiveCommand(Guid Id, bool Active) : MediatR.IRequest<NotificationResult<ProfessionalDto>>;
 
 public sealed record ProfessionalRecord(
@@ -21,7 +22,7 @@ public sealed record ProfessionalRecord(
 
 public interface IProfessionalRepository
 {
-    Task<IReadOnlyCollection<ProfessionalRecord>> ListAsync(Guid tenantId, string? search, string? role, bool? active, CancellationToken cancellationToken);
+    Task<PagedResult<ProfessionalRecord>> ListAsync(Guid tenantId, int page, int pageSize, string? search, string? role, bool? active, CancellationToken cancellationToken);
     Task<ProfessionalRecord?> GetAsync(Guid tenantId, Guid id, CancellationToken cancellationToken);
     Task<bool> EmailExistsAsync(Guid tenantId, string email, Guid? excludingId, CancellationToken cancellationToken);
     Task<ProfessionalRecord> CreateAsync(Guid tenantId, CreateProfessionalCommand command, CancellationToken cancellationToken);

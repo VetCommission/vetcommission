@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using VetCommission.Application.Common.Results;
 using VetCommission.Application.Features.Professionals;
 using VetCommission.Infrastructure.Persistence.Generated;
 using VetCommission.Infrastructure.Persistence.Generated.Entities;
@@ -7,13 +8,15 @@ namespace VetCommission.Infrastructure.Professionals;
 
 public sealed class ProfessionalRepository(VetCommissionDbContext db) : IProfessionalRepository
 {
-    public async Task<IReadOnlyCollection<ProfessionalRecord>> ListAsync(Guid tenantId, string? search, string? role, bool? active, CancellationToken cancellationToken)
+    public async Task<PagedResult<ProfessionalRecord>> ListAsync(Guid tenantId, int page, int pageSize, string? search, string? role, bool? active, CancellationToken cancellationToken)
     {
         var query = db.Professionals.AsNoTracking().Where(x => x.TenantId == tenantId);
         if (!string.IsNullOrWhiteSpace(search)) query = query.Where(x => x.Name.ToLower().Contains(search.Trim().ToLower()));
         if (!string.IsNullOrWhiteSpace(role)) query = query.Where(x => x.Role == role.Trim());
         if (active.HasValue) query = query.Where(x => x.Active == active.Value);
-        return await query.OrderBy(x => x.Name).Select(ToRecordExpression).ToArrayAsync(cancellationToken);
+        var totalItems = await query.CountAsync(cancellationToken);
+        var items = await query.OrderBy(x => x.Name).ThenBy(x => x.Id).Skip((page - 1) * pageSize).Take(pageSize).Select(ToRecordExpression).ToArrayAsync(cancellationToken);
+        return new(items, page, pageSize, totalItems);
     }
 
     public Task<ProfessionalRecord?> GetAsync(Guid tenantId, Guid id, CancellationToken cancellationToken) => db.Professionals.AsNoTracking().Where(x => x.TenantId == tenantId && x.Id == id).Select(ToRecordExpression).SingleOrDefaultAsync(cancellationToken);
