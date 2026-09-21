@@ -144,6 +144,27 @@ public sealed class MultiTenantIsolationTests(WebApiTestFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task ProfessionalMasterData_RequireTheirSpecificResources()
+    {
+        using var rolesClient = await CreateAuthenticatedClientAsync(
+            "funcoes@vetcommission.local",
+            TenantA);
+        using var professionalsClient = await CreateAuthenticatedClientAsync(
+            "profissionais@vetcommission.local",
+            TenantA);
+
+        var authorizedResponse = await rolesClient.GetAsync("/api/funcoes-cargos");
+        var forbiddenResponse = await professionalsClient.GetAsync("/api/funcoes-cargos");
+        var authorizedSpecialtiesResponse = await rolesClient.GetAsync("/api/especialidades");
+        var forbiddenSpecialtiesResponse = await professionalsClient.GetAsync("/api/especialidades");
+
+        authorizedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        forbiddenResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        authorizedSpecialtiesResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        forbiddenSpecialtiesResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
     private async Task<HttpClient> CreateAuthenticatedClientAsync(string email, string? tenantId)
     {
         var client = factory.CreateClient();

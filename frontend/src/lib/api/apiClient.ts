@@ -6,8 +6,22 @@ const tenantHeaderName = "X-Tenant-Id";
 let accessToken: string | null = null;
 let activeTenantId: string | null = null;
 
+export function getApiBaseUrl(): string | undefined {
+  const configuredUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return "http://localhost:5077";
+  }
+
+  return undefined;
+}
+
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5077",
+  baseURL: getApiBaseUrl(),
   timeout: 15_000,
   headers: {
     Accept: "application/json",
@@ -15,6 +29,10 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
+  if (!getApiBaseUrl()) {
+    return Promise.reject(new Error("NEXT_PUBLIC_API_URL deve ser configurada em produção."));
+  }
+
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   } else {

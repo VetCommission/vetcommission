@@ -10,6 +10,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import { setApiTenantId } from "@/lib/api/apiClient";
+import { useQueryClient } from "@tanstack/react-query";
 import type { AuthTenant } from "@/types/api";
 import { useAuth } from "./AuthProvider";
 import { resolveActiveTenantId } from "./resolveActiveTenant";
@@ -28,6 +29,7 @@ const TenantContext = createContext<TenantContextValue | null>(null);
 
 export function TenantProvider({ children }: PropsWithChildren) {
   const { session, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
   const tenants = useMemo(() => session?.tenants ?? [], [session?.tenants]);
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(() => readStoredTenantId());
   const activeTenantId = useMemo(
@@ -58,10 +60,12 @@ export function TenantProvider({ children }: PropsWithChildren) {
       }
 
       setSelectedTenantId(tenantId);
+      void queryClient.cancelQueries();
+      queryClient.removeQueries({ predicate: (query) => query.queryKey[0] === "tenant" && query.queryKey[1] !== tenantId });
       setApiTenantId(tenantId);
       storeTenantId(tenantId);
     },
-    [tenants],
+    [queryClient, tenants],
   );
 
   const clearTenant = useCallback(() => {

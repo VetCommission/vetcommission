@@ -69,6 +69,21 @@ public sealed class WebApiTestFactory : WebApplicationFactory<Program>, IAsyncLi
 
             INSERT INTO core."user" (id, name, email, normalized_email, password_hash, active)
             SELECT
+                seed.id,
+                seed.name,
+                seed.email,
+                upper(seed.email),
+                source.password_hash,
+                true
+            FROM core."user" source
+            CROSS JOIN (VALUES
+                ('22222222-2222-2222-2222-222222222225'::uuid, 'Gestor de funcoes', 'funcoes@vetcommission.local'),
+                ('22222222-2222-2222-2222-222222222226'::uuid, 'Gestor de profissionais', 'profissionais@vetcommission.local')
+            ) AS seed(id, name, email)
+            WHERE source.id = '22222222-2222-2222-2222-222222222222';
+
+            INSERT INTO core."user" (id, name, email, normalized_email, password_hash, active)
+            SELECT
                 '22222222-2222-2222-2222-222222222224',
                 'Usuario Exclusivo Tenant B',
                 'tenant-b@vetcommission.local',
@@ -80,18 +95,33 @@ public sealed class WebApiTestFactory : WebApplicationFactory<Program>, IAsyncLi
 
             INSERT INTO core.access_group (id, tenant_id, code, name, active)
             VALUES
-                ('33333333-3333-3333-3333-333333333334', '11111111-1111-1111-1111-111111111112', 'LIMITADO', 'Limitado', true);
+                ('33333333-3333-3333-3333-333333333334', '11111111-1111-1111-1111-111111111112', 'LIMITADO', 'Limitado', true),
+                ('33333333-3333-3333-3333-333333333335', '11111111-1111-1111-1111-111111111111', 'FUNCOES', 'Gestor de funcoes', true),
+                ('33333333-3333-3333-3333-333333333336', '11111111-1111-1111-1111-111111111111', 'PROFISSIONAIS', 'Gestor de profissionais', true);
 
             INSERT INTO core.access_group_resource (access_group_id, access_resource_id)
             SELECT '33333333-3333-3333-3333-333333333334', id
             FROM core.access_resource
             WHERE resource_key = 'app.access';
 
+            INSERT INTO core.access_group_resource (access_group_id, access_resource_id)
+            SELECT access_group_id, resource.id
+            FROM (VALUES
+                ('33333333-3333-3333-3333-333333333335'::uuid, 'app.access'),
+                ('33333333-3333-3333-3333-333333333335'::uuid, 'funcoes-cargos.gerenciar'),
+                ('33333333-3333-3333-3333-333333333335'::uuid, 'especialidades.gerenciar'),
+                ('33333333-3333-3333-3333-333333333336'::uuid, 'app.access'),
+                ('33333333-3333-3333-3333-333333333336'::uuid, 'profissionais.gerenciar')
+            ) AS grant_row(access_group_id, resource_key)
+            JOIN core.access_resource resource ON resource.resource_key = grant_row.resource_key;
+
             INSERT INTO core.user_tenant (id, user_id, tenant_id, access_group_id, active, is_default)
             VALUES
                 ('55555555-5555-5555-5555-555555555552', '22222222-2222-2222-2222-222222222223', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333332', true, true),
                 ('55555555-5555-5555-5555-555555555553', '22222222-2222-2222-2222-222222222223', '11111111-1111-1111-1111-111111111112', '33333333-3333-3333-3333-333333333334', true, false),
-                ('55555555-5555-5555-5555-555555555554', '22222222-2222-2222-2222-222222222224', '11111111-1111-1111-1111-111111111112', '33333333-3333-3333-3333-333333333334', true, true);
+                ('55555555-5555-5555-5555-555555555554', '22222222-2222-2222-2222-222222222224', '11111111-1111-1111-1111-111111111112', '33333333-3333-3333-3333-333333333334', true, true),
+                ('55555555-5555-5555-5555-555555555555', '22222222-2222-2222-2222-222222222225', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333335', true, true),
+                ('55555555-5555-5555-5555-555555555556', '22222222-2222-2222-2222-222222222226', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333336', true, true);
 
             INSERT INTO business.professional (id, tenant_id, name, role, active)
             VALUES

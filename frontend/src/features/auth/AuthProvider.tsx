@@ -48,18 +48,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
   });
 
   const clearSession = useCallback(() => {
+    queryClient.cancelQueries();
+    queryClient.clear();
     setAccessToken(null);
     clearStoredAccessToken();
     clearApiSession();
-    queryClient.removeQueries({ queryKey: ["auth"] });
   }, [queryClient]);
 
   useEffect(() => {
     if (currentSessionQuery.isError) {
       clearStoredAccessToken();
       clearApiSession();
+      queryClient.clear();
     }
-  }, [currentSessionQuery.isError]);
+  }, [currentSessionQuery.isError, queryClient]);
 
   const loginMutation = useMutation({
     mutationFn: loginRequest,
@@ -83,7 +85,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     () => ({
       session: currentSessionQuery.data ?? null,
       accessToken,
-      isAuthenticated: Boolean(accessToken && currentSessionQuery.data),
+      isAuthenticated: Boolean(accessToken && currentSessionQuery.data && !currentSessionQuery.isError),
       isLoading: currentSessionQuery.isLoading || loginMutation.isPending,
       login,
       logout: clearSession,
@@ -93,6 +95,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       clearSession,
       currentSessionQuery.data,
       currentSessionQuery.isLoading,
+      currentSessionQuery.isError,
       login,
       loginMutation.isPending,
     ],

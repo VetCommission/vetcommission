@@ -11,6 +11,7 @@ import { ApiError } from "@/lib/api/apiError";
 import type { Professional } from "@/types/api";
 import { createProfessional, listProfessionalRoles, listProfessionalSpecialties, updateProfessional, type ProfessionalInput } from "./professionalsApi";
 import { professionalQueryKeys } from "./professionalQueryKeys";
+import { useTenant } from "@/features/auth/TenantProvider";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Informe o nome.").max(160),
@@ -27,14 +28,15 @@ type FormMode = "create" | "view" | "edit";
 export function ProfessionalForm({ professional, initialMode = "view" }: { professional?: Professional; initialMode?: FormMode }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { activeTenantId } = useTenant();
   const [currentProfessional] = useState(professional);
   const [mode, setMode] = useState<FormMode>(professional ? initialMode : "create");
   const isReadOnly = mode === "view";
-  const rolesQuery = useQuery({ queryKey: ["professional-roles", "list"], queryFn: listProfessionalRoles });
-  const specialtiesQuery = useQuery({ queryKey: ["professional-specialties", "list"], queryFn: listProfessionalSpecialties });
+  const rolesQuery = useQuery({ queryKey: ["tenant", activeTenantId, "professional-roles", "list"], queryFn: ({ signal }) => listProfessionalRoles(signal), enabled: Boolean(activeTenantId) });
+  const specialtiesQuery = useQuery({ queryKey: ["tenant", activeTenantId, "professional-specialties", "list"], queryFn: ({ signal }) => listProfessionalSpecialties(signal), enabled: Boolean(activeTenantId) });
   const mutation = useMutation({
     mutationFn: (input: ProfessionalInput) => currentProfessional ? updateProfessional(currentProfessional.id, input) : createProfessional(input),
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: professionalQueryKeys.all }); router.replace("/app/profissionais"); },
+    onSuccess: async () => { if (activeTenantId) await queryClient.invalidateQueries({ queryKey: professionalQueryKeys.all(activeTenantId) }); router.replace("/app/profissionais"); },
   });
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),

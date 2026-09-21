@@ -12,13 +12,13 @@ export type ProfessionalInput = {
   userId?: string;
 };
 
-export async function listProfessionals(filters: { search?: string; role?: string; active?: boolean }) {
-  const response = await apiClient.get<Professional[]>(endpoints.professionals, { params: { busca: filters.search || undefined, funcao: filters.role || undefined, ativo: filters.active } });
+export async function listProfessionals(filters: { search?: string; role?: string; active?: boolean }, signal?: AbortSignal) {
+  const response = await apiClient.get<Professional[]>(endpoints.professionals, { params: { busca: filters.search || undefined, funcao: filters.role || undefined, ativo: filters.active }, signal });
   return response.data;
 }
 
-export async function getProfessional(id: string) {
-  const response = await apiClient.get<Professional>(`${endpoints.professionals}/${id}`);
+export async function getProfessional(id: string, signal?: AbortSignal) {
+  const response = await apiClient.get<Professional>(`${endpoints.professionals}/${id}`, { signal });
   return response.data;
 }
 
@@ -42,13 +42,13 @@ export async function getProfessionalMasterData() {
   return response.data;
 }
 
-export async function listProfessionalRoles() {
-  const response = await apiClient.get<{ id: string; name: string; active: boolean }[]>(endpoints.professionalRoles);
+export async function listProfessionalRoles(signal?: AbortSignal) {
+  const response = await apiClient.get<{ id: string; name: string; active: boolean }[]>(endpoints.professionalRoles, { signal });
   return response.data;
 }
 
-export async function listProfessionalSpecialties() {
-  const response = await apiClient.get<{ id: string; name: string; active: boolean }[]>(endpoints.professionalSpecialties);
+export async function listProfessionalSpecialties(signal?: AbortSignal) {
+  const response = await apiClient.get<{ id: string; name: string; active: boolean }[]>(endpoints.professionalSpecialties, { signal });
   return response.data;
 }
 

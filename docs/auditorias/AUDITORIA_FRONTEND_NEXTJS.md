@@ -1,5 +1,7 @@
 # Auditoria técnica do frontend
 
+> **Nota de atualização:** as seções originais abaixo registram o diagnóstico inicial. A reavaliação corrente está documentada na seção **Reavaliação pós-adequação arquitetural** ao final deste arquivo; quando houver conflito, prevalece a reavaliação.
+
 > Data da auditoria: 21/09/2026  
 > Escopo: `frontend/`, integrações diretamente relacionadas à segurança multi-tenant na API e automação do repositório.  
 > Método: inspeção estática, leitura da documentação local e da documentação instalada do Next.js 16.3.5, inventário de dependências, busca objetiva e execução dos scripts seguros disponíveis. Nenhum código, pacote, lockfile ou configuração foi alterado.
@@ -427,3 +429,49 @@ Enquanto esses checks não existirem, exigir evidência manual equivalente não 
 3. **Existem problemas que devem bloquear novos desenvolvimentos?** Sim. Novas funcionalidades multi-tenant devem aguardar a correção do enforcement na API e do cache/sessão no frontend. Trabalho dedicado à estabilização pode continuar.
 4. **Existem problemas que devem bloquear merge ou produção?** Sim. FRONT-001, FRONT-002 e FRONT-003 bloqueiam merge de funcionalidades multi-tenant e produção. FRONT-004, FRONT-005 e FRONT-006 também devem bloquear uma liberação produtiva.
 5. **Quais são as três próximas ações recomendadas?** (1) corrigir e testar autorização `(usuário, tenant, recurso)` na API; (2) segmentar/limpar/cancelar o cache por tenant e sessão; (3) criar CI com testes automatizados de isolamento, login e autorização antes de retomar features.
+
+## Reavaliação pós-adequação arquitetural — 21/09/2026
+
+Esta seção substitui as conclusões conflitantes do diagnóstico inicial para o estado atual do workspace.
+
+### Validações atuais
+
+| Validação | Resultado | Evidência |
+| --- | --- | --- |
+| Frontend lint | PASSOU | `frontend`: `npm.cmd run lint`, código 0. |
+| Frontend build | PASSOU | `frontend`: `npm.cmd run build`, Next 16.3.5, TypeScript e 13 rotas geradas. |
+| Testes unitários backend | PASSOU | `dotnet test tests/VetCommission.UnitTests/VetCommission.UnitTests.csproj -c Release --no-restore`: 21/21. |
+| Testes integração backend | PASSOU | `dotnet test tests/VetCommission.IntegrationTests/VetCommission.IntegrationTests.csproj -c Release --no-restore`: 15/15. |
+| Testes frontend | NÃO CONFIGURADO | Adiados por decisão de escopo; não há runner frontend. |
+| CI/CD | NÃO CONFIGURADO | Nenhum workflow GitHub Actions foi criado. |
+
+### Status atualizado dos achados
+
+- `FRONT-001`: **resolvido tecnicamente**. A policy consulta usuário, tenant e recurso no banco em `src/VetCommission.WebApi/Auth/AccessResourceAuthorizationHandler.cs:19-30`; os testes de isolamento cobrem header arbitrário, tenant inválido, recurso cruzado e vínculos de usuário.
+- `FRONT-002`: **parcialmente resolvido**. Query keys de profissionais, funções e especialidades passaram a incluir tenant; queries recebem `enabled` e `AbortSignal`. Paginação e filtros na URL continuam pendentes.
+- `FRONT-003`: **resolvido tecnicamente**. Logout e falha de `/auth/me` cancelam/limpam o `QueryClient` em `frontend/src/features/auth/AuthProvider.tsx:50-64`; troca de tenant remove queries de outros tenants em `TenantProvider.tsx:54-65`.
+- `FRONT-004`: **aberto — alto**. Access token ainda está em `localStorage` em `frontend/src/features/auth/authStorage.ts`; depende da ADR e da decisão de topologia da tarefa 5.
+- `FRONT-005`: **aberto — alto**. Testes frontend seguem adiados; os testes backend não substituem cobertura de guards, formulários, cache e UI.
+- `FRONT-006`: **aberto — alto**. Não há `.github/workflows` nem checks obrigatórios.
+- `FRONT-007`: **parcialmente resolvido**. Foram criados `src/app/loading.tsx`, `error.tsx`, `global-error.tsx` e `not-found.tsx`; a tela de detalhe ainda precisa distinguir erro de API e registro inexistente com `notFound()`.
+- `FRONT-008`: **aberto — médio**. Páginas e features ainda possuem fronteiras cliente amplas.
+- `FRONT-009`: **parcialmente resolvido**. Cancelamento foi propagado ao Axios; debounce, paginação, ordenação e estado reproduzível na URL permanecem pendentes.
+- `FRONT-010`: **parcialmente resolvido**. `MasterDataForm` agora trata erro geral e `isSubmitting`; mapeamento de erros por campo e padronização de todos os formulários permanecem pendentes.
+- `FRONT-011`: **aberto — médio**. Selects e foco/axe ainda não foram auditados dinamicamente.
+- `FRONT-012`: **aberto — médio**. Ativação/inativação de profissional ainda não exige confirmação.
+- `FRONT-013`: **aberto — médio**. APIs e contratos continuam concentrados em `features/professionals/professionalsApi.ts` e `src/types/api.ts`.
+- `FRONT-014`: **parcialmente resolvido**. Falha de `/auth/me` agora invalida autenticação derivada e limpa cache; migração para cookie seguro continua pendente.
+- `FRONT-015`: **parcialmente resolvido**. Arquivos alterados nesta etapa foram formatados e links quebrados de funções/especialidades foram removidos; navegação declarativa geral ainda pode evoluir.
+- `FRONT-016`: **parcialmente resolvido**. `next.config.ts` agora emite CSP em modo report-only, `Referrer-Policy`, `Permissions-Policy` e `X-Content-Type-Options`; a CSP precisa ser validada no ambiente real e o ponto de terminação TLS ainda não foi confirmado.
+
+### Novos achados corrigidos nesta reavaliação
+
+- **AUTH-017 — resolvido:** controllers de funções e especialidades usavam `ProfessionalsManage` em vez de suas policies específicas. Corrigidos em `ProfessionalRolesController.cs:3` e `ProfessionalSpecialtiesController.cs:3`; teste `ProfessionalMasterData_RequireTheirSpecificResources` passou.
+- **ROUTE-018 — resolvido:** botões “Visualizar” apontavam para rotas `[id]` inexistentes nas telas de funções e especialidades. As ações foram removidas até existir fluxo de detalhe/edição real.
+- **CONFIG-019 — resolvido:** ausência de `NEXT_PUBLIC_API_URL` não usa mais silenciosamente uma URL local em produção. `apiClient.ts:9-24` falha no momento da requisição quando a configuração não existe; fallback localhost permanece somente fora de produção.
+
+### Classificação corrente
+
+**Nota atual estimada: 6,3/10 — parcialmente conforme.** A autorização de API, isolamento de cache e boundaries básicos melhoraram, mas a base ainda não está pronta para produção devido a token em `localStorage`, ausência de testes frontend, CI, E2E, paginação/URL e validação de deploy.
+
+**Bloqueadores atuais de produção:** `FRONT-004`, `FRONT-005`, `FRONT-006` e a ausência de confirmação operacional da topologia de cookies/CSRF. **Bloqueadores para novas funcionalidades multi-tenant:** autenticação segura, testes frontend e CI. Nenhum arquivo de tabela genérica ou evolução de toast foi incluído.
