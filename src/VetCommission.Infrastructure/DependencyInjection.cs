@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using VetCommission.Application.Features.Auth;
 using VetCommission.Infrastructure.Auth;
 using VetCommission.Infrastructure.Persistence.Generated;
+using VetCommission.Infrastructure.Professionals;
+using VetCommission.Application.Features.Professionals;
 
 namespace VetCommission.Infrastructure;
 
@@ -23,14 +25,15 @@ public static class DependencyInjection
                     .UseNpgsql(connectionString, npgsql => npgsql.EnableRetryOnFailure())
                     .UseSnakeCaseNamingConvention());
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IProfessionalRepository, ProfessionalRepository>();
         }
         else
         {
             services.AddScoped<IAuthRepository, UnavailableAuthRepository>();
+            services.AddScoped<IProfessionalRepository, UnavailableProfessionalRepository>();
         }
 
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
-
         return services;
     }
 }

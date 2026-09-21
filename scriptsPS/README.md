@@ -10,6 +10,18 @@ Execute os scripts a partir da raiz do repositório. Pré-requisitos:
 
 ## Iniciar os componentes
 
+Para parar API, frontend e Worker:
+
+```powershell
+.\scriptsPS\00-Stop-All.ps1
+```
+
+O PostgreSQL permanece em execucao por padrao. Para parar tambem o banco:
+
+```powershell
+.\scriptsPS\00-Stop-All.ps1 -StopDatabase
+```
+
 Para parar processos que estejam usando as portas da API e do frontend e iniciar novamente os dois servicos:
 
 ```powershell
@@ -62,6 +74,7 @@ Se a versao ativa do Node for diferente e `nvm`, `fnm` ou `volta` estiver instal
 
 O script executa o processo padrao de pos-implementacao:
 
+- encerra API, frontend e Worker antes de compilar para liberar portas e DLLs bloqueadas;
 - `dotnet restore`, `dotnet build` e `dotnet test`;
 - `npm ci` somente quando `node_modules` nao existir, estiver incompleto ou quando `-RefreshFrontendDependencies` for informado;
 - `npm run lint` e `npm run build`;

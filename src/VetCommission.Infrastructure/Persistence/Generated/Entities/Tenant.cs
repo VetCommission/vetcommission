@@ -21,5 +21,7 @@ public partial class Tenant
 
     public virtual ICollection<AccessGroup> AccessGroups { get; set; } = new List<AccessGroup>();
 
+    public virtual ICollection<Professional> Professionals { get; set; } = new List<Professional>();
+
     public virtual ICollection<UserTenant> UserTenants { get; set; } = new List<UserTenant>();
 }

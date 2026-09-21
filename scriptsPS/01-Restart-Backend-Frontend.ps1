@@ -7,6 +7,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $apiPort = 5077
 $frontendPort = 3000
+$stopAllScript = Join-Path $PSScriptRoot '00-Stop-All.ps1'
 $apiScript = Join-Path $PSScriptRoot 'Start-Api.ps1'
 $frontendScript = Join-Path $PSScriptRoot 'Start-Frontend.ps1'
 
@@ -38,9 +39,15 @@ foreach ($requiredFile in @($apiScript, $frontendScript)) {
     }
 }
 
-Write-Host '==> Parando servicos atuais'
-Stop-ProcessesUsingTcpPort $apiPort 'API'
-Stop-ProcessesUsingTcpPort $frontendPort 'frontend'
+if (-not (Test-Path -LiteralPath $stopAllScript -PathType Leaf)) {
+    throw "Script de parada nao encontrado: $stopAllScript"
+}
+
+Write-Host '==> Parando servicos atuais com 00-Stop-All.ps1'
+& $stopAllScript
+if (-not $?) {
+    throw 'Nao foi possivel parar os servicos atuais.'
+}
 
 if (-not $SkipDatabase) {
     if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {

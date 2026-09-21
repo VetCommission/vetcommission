@@ -38,3 +38,19 @@ export type LoginRequest = {
   email: string;
   senha: string;
 };
+
+export type Professional = {
+  id: string;
+  tenantId: string;
+  userId: string | null;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role: string;
+  professionalRegistration: string | null;
+  specialty: string | null;
+  active: boolean;
+  createdAtUtc: string;
+  updatedAtUtc: string | null;
+  inactivatedAtUtc: string | null;
+};

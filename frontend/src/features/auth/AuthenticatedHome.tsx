@@ -19,6 +19,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "./AuthProvider";
 import { useTenant } from "./TenantProvider";
+import { accessResources } from "./accessResources";
+import { tenantHasAccess } from "./permissions";
 
 type AuthenticatedHomeProps = {
   area: "administrativa" | "do profissional";
@@ -84,6 +86,11 @@ export function AuthenticatedHome({ area }: AuthenticatedHomeProps) {
                   ))}
                 </Select>
               </FormControl>
+              {tenantHasAccess(activeTenant, accessResources.professionalsManage) ? (
+                <Button variant="outlined" onClick={() => router.push("/app/profissionais")}>
+                  Profissionais
+                </Button>
+              ) : null}
             </Stack>
           </Paper>
 
