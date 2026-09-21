@@ -1,6 +1,7 @@
 using MediatR;
 using VetCommission.Application.Common.Errors;
 using VetCommission.Application.Common.Results;
+using VetCommission.Application.Features.Auth;
 using VetCommission.Application.Features.Auth.Tenant;
 
 namespace VetCommission.Application.Features.Professionals;
@@ -30,22 +31,24 @@ public sealed class GetProfessionalHandler(IProfessionalRepository repository, I
     }
 }
 
-public sealed class CreateProfessionalHandler(IProfessionalRepository repository, ITenantContext tenant) : IRequestHandler<CreateProfessionalCommand, NotificationResult<ProfessionalDto>>
+public sealed class CreateProfessionalHandler(IProfessionalRepository repository, IAuthRepository authRepository, ITenantContext tenant) : IRequestHandler<CreateProfessionalCommand, NotificationResult<ProfessionalDto>>
 {
     public async Task<NotificationResult<ProfessionalDto>> Handle(CreateProfessionalCommand request, CancellationToken cancellationToken)
     {
         if (tenant.TenantId is not Guid tenantId) return NotificationResult<ProfessionalDto>.Failure(new NotificationError(ErrorCodes.Forbidden, "Tenant ativo obrigatorio."));
+        if (request.UserId is Guid userId && !await authRepository.UserHasActiveTenantAsync(userId, tenantId, cancellationToken)) return NotificationResult<ProfessionalDto>.Failure(new NotificationError(ErrorCodes.Validation, "Usuario informado nao pertence ao tenant ativo.", nameof(request.UserId)));
         if (!string.IsNullOrWhiteSpace(request.Email) && await repository.EmailExistsAsync(tenantId, request.Email, null, cancellationToken)) return NotificationResult<ProfessionalDto>.Failure(new NotificationError(ErrorCodes.Conflict, "Ja existe profissional com este e-mail no tenant."));
         var record = await repository.CreateAsync(tenantId, request, cancellationToken);
         return NotificationResult<ProfessionalDto>.Success(ProfessionalMapping.ToDto(record));
     }
 }
 
-public sealed class UpdateProfessionalHandler(IProfessionalRepository repository, ITenantContext tenant) : IRequestHandler<UpdateProfessionalCommand, NotificationResult<ProfessionalDto>>
+public sealed class UpdateProfessionalHandler(IProfessionalRepository repository, IAuthRepository authRepository, ITenantContext tenant) : IRequestHandler<UpdateProfessionalCommand, NotificationResult<ProfessionalDto>>
 {
     public async Task<NotificationResult<ProfessionalDto>> Handle(UpdateProfessionalCommand request, CancellationToken cancellationToken)
     {
         if (tenant.TenantId is not Guid tenantId) return NotificationResult<ProfessionalDto>.Failure(new NotificationError(ErrorCodes.Forbidden, "Tenant ativo obrigatorio."));
+        if (request.UserId is Guid userId && !await authRepository.UserHasActiveTenantAsync(userId, tenantId, cancellationToken)) return NotificationResult<ProfessionalDto>.Failure(new NotificationError(ErrorCodes.Validation, "Usuario informado nao pertence ao tenant ativo.", nameof(request.UserId)));
         if (!string.IsNullOrWhiteSpace(request.Email) && await repository.EmailExistsAsync(tenantId, request.Email, request.Id, cancellationToken)) return NotificationResult<ProfessionalDto>.Failure(new NotificationError(ErrorCodes.Conflict, "Ja existe profissional com este e-mail no tenant."));
         var record = await repository.UpdateAsync(tenantId, request, cancellationToken);
         return record is null ? NotificationResult<ProfessionalDto>.Failure(new NotificationError(ErrorCodes.NotFound, "Profissional nao encontrado.")) : NotificationResult<ProfessionalDto>.Success(ProfessionalMapping.ToDto(record));

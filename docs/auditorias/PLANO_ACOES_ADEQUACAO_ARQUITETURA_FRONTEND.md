@@ -84,19 +84,19 @@ A exclusão do componente visual de tabela não exclui a paginação. Todas as A
 
 **Cenários obrigatórios:**
 
-- [ ] Usuário do tenant A acessa recurso do tenant A e recebe sucesso.
-- [ ] Usuário do tenant A envia `X-Tenant-Id` do tenant B e recebe `403` ou `404`.
-- [ ] Usuário com recurso no tenant A, mas sem o mesmo recurso no tenant B, não acessa o tenant B.
-- [ ] ID de profissional do tenant B não pode ser lido, alterado, ativado ou inativado pelo tenant A.
-- [ ] `tenantId` ou `userId` adulterado no payload não muda o escopo da operação.
-- [ ] Ausência de tenant em endpoint tenant-scoped é rejeitada de forma padronizada.
+- [x] Usuário do tenant A acessa recurso do tenant A e recebe sucesso.
+- [x] Usuário do tenant A envia `X-Tenant-Id` do tenant B e recebe `403` ou `404`.
+- [x] Usuário com recurso no tenant A, mas sem o mesmo recurso no tenant B, não acessa o tenant B.
+- [x] ID de profissional do tenant B não pode ser lido, alterado, ativado ou inativado pelo tenant A.
+- [x] `tenantId` ou `userId` adulterado no payload não muda o escopo da operação.
+- [x] Ausência de tenant em endpoint tenant-scoped é rejeitada de forma padronizada.
 
 **Execução:**
 
-- [ ] Escrever primeiro os testes negativos.
-- [ ] Executar os testes e registrar quais falham antes da correção.
-- [ ] Não flexibilizar asserts para acomodar o comportamento inseguro.
-- [ ] Confirmar que nenhuma resposta revela se um registro de outro tenant existe.
+- [x] Escrever primeiro os testes negativos.
+- [x] Executar os testes e registrar quais falham antes da correção.
+- [x] Não flexibilizar asserts para acomodar o comportamento inseguro.
+- [x] Confirmar que nenhuma resposta revela se um registro de outro tenant existe.
 
 **Critério de aceite:** existe evidência automatizada e reproduzível do risco descrito no `FRONT-001`; após a Tarefa 2, todos os cenários passam.
 
@@ -124,14 +124,14 @@ Task<bool> PossuiAcessoAsync(
 
 **Passos:**
 
-- [ ] Mapear todos os endpoints tenant-scoped e as policies utilizadas.
-- [ ] Fazer a resolução do tenant rejeitar valor ausente, inválido ou sem vínculo ativo.
-- [ ] Fazer o handler validar o recurso dentro do tenant atual, sem usar união global de recursos.
-- [ ] Evitar que claims agregadas entre tenants concedam acesso cruzado.
-- [ ] Manter filtros por `TenantId` nos repositórios como segunda camada de proteção.
-- [ ] Garantir que comandos não aceitem tenant arbitrário do corpo como fonte de autoridade.
-- [ ] Executar testes unitários de autorização e os testes de integração da Tarefa 1.
-- [ ] Documentar a regra em arquivo arquitetural de segurança/multi-tenancy.
+- [x] Mapear todos os endpoints tenant-scoped e as policies utilizadas.
+- [x] Fazer a resolução do tenant rejeitar valor ausente, inválido ou sem vínculo ativo.
+- [x] Fazer o handler validar o recurso dentro do tenant atual, sem usar união global de recursos.
+- [x] Evitar que claims agregadas entre tenants concedam acesso cruzado.
+- [x] Manter filtros por `TenantId` nos repositórios como segunda camada de proteção.
+- [x] Garantir que comandos não aceitem tenant arbitrário do corpo como fonte de autoridade.
+- [x] Executar testes unitários de autorização e os testes de integração da Tarefa 1.
+- [x] Documentar a regra em arquivo arquitetural de segurança/multi-tenancy.
 
 **Critério de aceite:** nenhum endpoint tenant-scoped autoriza somente por recurso global; todos os testes cruzados passam; `FRONT-001` encerrado.
 

@@ -40,6 +40,12 @@ public interface IAuthRepository
     Task<AuthUserRecord?> FindByIdAsync(Guid userId, CancellationToken cancellationToken);
 
     Task<bool> UserHasActiveTenantAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken);
+
+    Task<bool> UserHasAccessAsync(
+        Guid userId,
+        Guid tenantId,
+        string resource,
+        CancellationToken cancellationToken);
 }
 
 public interface IPasswordHasher

@@ -1,5 +1,7 @@
 using FluentAssertions;
+using NSubstitute;
 using VetCommission.Application.Common.Errors;
+using VetCommission.Application.Features.Auth;
 using VetCommission.Application.Features.Auth.Tenant;
 using VetCommission.Application.Features.Professionals;
 
@@ -12,7 +14,7 @@ public sealed class ProfessionalHandlersTests
     {
         var tenantId = Guid.NewGuid();
         var repository = new StubProfessionalRepository();
-        var handler = new CreateProfessionalHandler(repository, new StubTenantContext(tenantId));
+        var handler = new CreateProfessionalHandler(repository, Substitute.For<IAuthRepository>(), new StubTenantContext(tenantId));
         var command = new CreateProfessionalCommand("Dra. Ana", "ana@clinica.local", null, "Veterinaria", null, "Clínica", null);
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -26,7 +28,7 @@ public sealed class ProfessionalHandlersTests
     [Fact]
     public async Task Create_ShouldReturnForbiddenWithoutActiveTenant()
     {
-        var handler = new CreateProfessionalHandler(new StubProfessionalRepository(), new StubTenantContext(null));
+        var handler = new CreateProfessionalHandler(new StubProfessionalRepository(), Substitute.For<IAuthRepository>(), new StubTenantContext(null));
 
         var result = await handler.Handle(new CreateProfessionalCommand("Ana", null, null, "Veterinaria", null, null, null), CancellationToken.None);
 
@@ -39,12 +41,35 @@ public sealed class ProfessionalHandlersTests
     {
         var tenantId = Guid.NewGuid();
         var repository = new StubProfessionalRepository { EmailExists = true };
-        var handler = new CreateProfessionalHandler(repository, new StubTenantContext(tenantId));
+        var handler = new CreateProfessionalHandler(repository, Substitute.For<IAuthRepository>(), new StubTenantContext(tenantId));
 
         var result = await handler.Handle(new CreateProfessionalCommand("Ana", "ana@clinica.local", null, "Veterinaria", null, null, null), CancellationToken.None);
 
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(error => error.Code == ErrorCodes.Conflict);
+    }
+
+    [Fact]
+    public async Task Create_ShouldRejectUserWithoutActiveLinkToTenant()
+    {
+        var tenantId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var authRepository = Substitute.For<IAuthRepository>();
+        authRepository
+            .UserHasActiveTenantAsync(userId, tenantId, Arg.Any<CancellationToken>())
+            .Returns(false);
+        var handler = new CreateProfessionalHandler(
+            new StubProfessionalRepository(),
+            authRepository,
+            new StubTenantContext(tenantId));
+
+        var result = await handler.Handle(
+            new CreateProfessionalCommand("Ana", null, null, "Veterinaria", null, null, userId),
+            CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().ContainSingle(error =>
+            error.Code == ErrorCodes.Validation && error.Field == nameof(CreateProfessionalCommand.UserId));
     }
 
     [Fact]

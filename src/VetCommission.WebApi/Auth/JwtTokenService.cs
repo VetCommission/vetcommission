@@ -10,8 +10,6 @@ namespace VetCommission.WebApi.Auth;
 
 public sealed class JwtTokenService(IOptions<JwtOptions> options) : IJwtTokenService
 {
-    public const string AccessClaimType = "acesso";
-
     public JwtTokenResult CreateToken(AuthUserRecord user)
     {
         var jwtOptions = options.Value;
@@ -26,11 +24,6 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options) : IJwtTokenSer
             new(ClaimTypes.Email, user.Email),
             new(ClaimTypes.Name, user.Name)
         };
-
-        claims.AddRange(user.Tenants
-            .SelectMany(tenant => tenant.Recursos)
-            .Distinct(StringComparer.Ordinal)
-            .Select(resource => new Claim(AccessClaimType, resource)));
 
         var token = new JwtSecurityToken(
             jwtOptions.Issuer,

@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Mvc.Testing;
-
 namespace VetCommission.IntegrationTests.WebApi;
 
 [CollectionDefinition(Name)]
-public sealed class WebApiCollection : ICollectionFixture<WebApplicationFactory<Program>>
+public sealed class WebApiCollection : ICollectionFixture<WebApiTestFactory>
 {
     public const string Name = "WebApi";
 }

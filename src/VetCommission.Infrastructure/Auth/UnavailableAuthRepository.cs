@@ -24,6 +24,15 @@ public sealed class UnavailableAuthRepository : IAuthRepository
         throw CreateException();
     }
 
+    public Task<bool> UserHasAccessAsync(
+        Guid userId,
+        Guid tenantId,
+        string resource,
+        CancellationToken cancellationToken)
+    {
+        throw CreateException();
+    }
+
     private static InvalidOperationException CreateException()
     {
         return new InvalidOperationException(

@@ -72,7 +72,7 @@ try
                 ClockSkew = TimeSpan.FromMinutes(1)
             };
         });
-    builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, AccessResourceAuthorizationHandler>();
+    builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, AccessResourceAuthorizationHandler>();
     builder.Services.AddAuthorization(options => options.AddVetCommissionResourcePolicies());
 
     var app = builder.Build();

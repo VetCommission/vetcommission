@@ -125,6 +125,9 @@ public sealed class LoginCommandHandlerTests
                 user?.Id == userId &&
                 user.Tenants.Any(tenant => tenant.TenantId == tenantId));
         }
+
+        public Task<bool> UserHasAccessAsync(Guid userId, Guid tenantId, string resource, CancellationToken cancellationToken) =>
+            Task.FromResult(false);
     }
 
     private sealed class StubPasswordHasher(bool isValid) : IPasswordHasher

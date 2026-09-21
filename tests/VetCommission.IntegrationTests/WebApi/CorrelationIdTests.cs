@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace VetCommission.IntegrationTests.WebApi;
 
@@ -8,7 +7,7 @@ public sealed class CorrelationIdTests
 {
     private readonly HttpClient _client;
 
-    public CorrelationIdTests(WebApplicationFactory<Program> factory)
+    public CorrelationIdTests(WebApiTestFactory factory)
     {
         _client = factory.CreateClient();
     }
