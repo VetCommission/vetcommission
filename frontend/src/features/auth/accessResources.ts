@@ -4,6 +4,8 @@ export const accessResources = {
   professionalPortal: "professional.portal",
   professionalsMenu: "menu.profissionais",
   professionalsManage: "profissionais.gerenciar",
+  professionalRolesManage: "funcoes-cargos.gerenciar",
+  professionalSpecialtiesManage: "especialidades.gerenciar",
 } as const;
 
 export type AccessResource = (typeof accessResources)[keyof typeof accessResources];

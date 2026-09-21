@@ -54,3 +54,8 @@ export type Professional = {
   updatedAtUtc: string | null;
   inactivatedAtUtc: string | null;
 };
+
+export type ProfessionalMasterData = {
+  roles: { id: string; name: string; active: boolean }[];
+  specialties: { id: string; name: string; active: boolean }[];
+};

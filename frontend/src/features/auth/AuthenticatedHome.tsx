@@ -91,6 +91,16 @@ export function AuthenticatedHome({ area }: AuthenticatedHomeProps) {
                   Profissionais
                 </Button>
               ) : null}
+              {tenantHasAccess(activeTenant, accessResources.professionalRolesManage) ? (
+                <Button variant="outlined" onClick={() => router.push("/app/funcoes-cargos")}>
+                  Funções e cargos
+                </Button>
+              ) : null}
+              {tenantHasAccess(activeTenant, accessResources.professionalSpecialtiesManage) ? (
+                <Button variant="outlined" onClick={() => router.push("/app/especialidades")}>
+                  Especialidades
+                </Button>
+              ) : null}
             </Stack>
           </Paper>
 
