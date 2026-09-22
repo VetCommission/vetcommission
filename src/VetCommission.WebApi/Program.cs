@@ -38,7 +38,8 @@ try
                 .AllowAnyMethod();
         });
     });
-    builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<VetCommission.Application.Features.Auth.Tenant.IClinicContext, VetCommission.WebApi.Auth.HttpClinicContext>();
     builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
     builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
     builder.Services.AddHealthChecks();

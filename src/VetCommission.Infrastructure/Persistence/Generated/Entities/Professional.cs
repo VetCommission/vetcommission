@@ -31,6 +31,10 @@ public partial class Professional
 
     public DateTime? InactivatedAtUtc { get; set; }
 
+    public Guid ClinicId { get; set; }
+
+    public virtual Clinic Clinic { get; set; } = null!;
+
     public virtual Tenant Tenant { get; set; } = null!;
 
     public virtual User? User { get; set; }

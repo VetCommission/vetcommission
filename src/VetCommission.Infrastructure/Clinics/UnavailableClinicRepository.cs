@@ -1,0 +1,4 @@
+using VetCommission.Application.Features.Clinics;
+using VetCommission.Application.Common.Results;
+namespace VetCommission.Infrastructure.Clinics;
+public sealed class UnavailableClinicRepository:IClinicRepository{public Task<PagedResult<ClinicDto>> ListAsync(Guid t,int p,int s,string? q,bool? a,CancellationToken c)=>throw new InvalidOperationException("Banco de dados nao configurado.");public Task<ClinicDto?> GetAsync(Guid t,Guid id,CancellationToken c)=>throw new InvalidOperationException("Banco de dados nao configurado.");public Task<ClinicDto?> SaveAsync(Guid t,SaveClinicCommand x,CancellationToken c)=>throw new InvalidOperationException("Banco de dados nao configurado.");public Task<ClinicDto?> SetActiveAsync(Guid t,Guid id,bool a,CancellationToken c)=>throw new InvalidOperationException("Banco de dados nao configurado.");}

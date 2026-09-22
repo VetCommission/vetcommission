@@ -123,10 +123,15 @@ public sealed class WebApiTestFactory : WebApplicationFactory<Program>, IAsyncLi
                 ('55555555-5555-5555-5555-555555555555', '22222222-2222-2222-2222-222222222225', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333335', true, true),
                 ('55555555-5555-5555-5555-555555555556', '22222222-2222-2222-2222-222222222226', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333336', true, true);
 
-            INSERT INTO business.professional (id, tenant_id, name, role, active)
+            INSERT INTO business.clinic (id, tenant_id, name, active)
             VALUES
-                ('66666666-6666-6666-6666-666666666661', '11111111-1111-1111-1111-111111111111', 'Profissional A', 'Veterinario', true),
-                ('66666666-6666-6666-6666-666666666662', '11111111-1111-1111-1111-111111111112', 'Profissional B', 'Veterinario', true);
+                ('77777777-7777-7777-7777-777777777771', '11111111-1111-1111-1111-111111111111', 'Clínica A', true),
+                ('77777777-7777-7777-7777-777777777772', '11111111-1111-1111-1111-111111111112', 'Clínica B', true);
+
+            INSERT INTO business.professional (id, tenant_id, clinic_id, name, role, active)
+            VALUES
+                ('66666666-6666-6666-6666-666666666661', '11111111-1111-1111-1111-111111111111', '77777777-7777-7777-7777-777777777771', 'Profissional A', 'Veterinario', true),
+                ('66666666-6666-6666-6666-666666666662', '11111111-1111-1111-1111-111111111112', '77777777-7777-7777-7777-777777777772', 'Profissional B', 'Veterinario', true);
             """;
 
         await using var connection = new NpgsqlConnection(_postgres.GetConnectionString());

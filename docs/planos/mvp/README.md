@@ -81,7 +81,8 @@ flowchart LR
 | 01 | Fundação da solução | Solução e frontend compilando, testes-base e infraestrutura comum | 00 | [Abrir](01-fundacao-da-solucao.md) |
 | 02 | Identidade, tenant e acesso | Login e isolamento por tenant/perfil | 01 | [Abrir](02-identidade-tenant-acesso.md) |
 | 03 | Profissionais | Cadastro e inativação ponta a ponta | 02 | [Abrir](03-profissionais.md) |
-| 04 | Categorias e procedimentos | Catálogo utilizável na produção | 03 | [Abrir](04-categorias-procedimentos.md) |
+| 03.5 | Clínicas do tenant | Contexto operacional por clínica | 02 | [Abrir](03.5-clinicas.md) |
+| 04 | Categorias e procedimentos | Catálogo utilizável na produção | 03 e 03.5 | [Abrir](04-categorias-procedimentos.md) |
 | 05 | Competências e regras | Período aberto e regra vigente determinável | 04 | [Abrir](05-competencias-regras-comissao.md) |
 | 06 | Produção e cálculo | Produção gera comissão e snapshot atomicamente | 05 | [Abrir](06-producao-calculo.md) |
 | 07 | Conferência administrativa | Consulta, detalhe e correção auditada | 06 | [Abrir](07-conferencia-administrativa.md) |

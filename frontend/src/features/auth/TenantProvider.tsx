@@ -9,12 +9,15 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import { setApiTenantId } from "@/lib/api/apiClient";
+import { useQuery } from "@tanstack/react-query";
+import { setApiClinicId, setApiTenantId } from "@/lib/api/apiClient";
 import { useQueryClient } from "@tanstack/react-query";
 import type { AuthTenant } from "./authTypes";
 import { useAuth } from "./AuthProvider";
 import { resolveActiveTenantId } from "./resolveActiveTenant";
 import { clearStoredTenantId, readStoredTenantId, storeTenantId } from "./tenantStorage";
+import { clearStoredClinicId, readStoredClinicId, storeClinicId } from "./clinicStorage";
+import { listClinics, type Clinic } from "@/features/clinics/clinicsApi";
 
 type TenantContextValue = {
   tenants: AuthTenant[];
@@ -23,6 +26,7 @@ type TenantContextValue = {
   hasTenant: boolean;
   selectTenant: (tenantId: string) => void;
   clearTenant: () => void;
+  clinics: Clinic[]; activeClinic: Clinic | null; activeClinicId: string | null; selectClinic: (id: string) => void;
 };
 
 const TenantContext = createContext<TenantContextValue | null>(null);
@@ -38,22 +42,33 @@ export function TenantProvider({ children }: PropsWithChildren) {
     () => (isAuthenticated ? resolveActiveTenantId(tenants, selectedTenantId) : null),
     [isAuthenticated, selectedTenantId, tenants],
   );
+  const clinicsQuery = useQuery({ queryKey: ["tenant", activeTenantId, "clinics", "context"], queryFn: ({signal}) => listClinics(1, 100, undefined, true, signal), enabled: Boolean(activeTenantId) });
+  const clinics = useMemo(() => clinicsQuery.data?.items ?? [], [clinicsQuery.data?.items]);
+  const [selectedClinicId, setSelectedClinicId] = useState<string | null>(() => readStoredClinicId());
+  const activeClinicId = useMemo(() => clinics.find(x=>x.id===selectedClinicId)?.id ?? clinics[0]?.id ?? null, [clinics, selectedClinicId]);
 
   useEffect(() => {
     if (!isAuthenticated) {
       setApiTenantId(null);
+      setApiClinicId(null);
       clearStoredTenantId();
+      clearStoredClinicId();
       return;
     }
 
     setApiTenantId(activeTenantId);
+    setApiClinicId(activeClinicId);
 
     if (activeTenantId) {
       storeTenantId(activeTenantId);
     } else {
       clearStoredTenantId();
+      clearStoredClinicId();
+      setApiClinicId(null);
     }
-  }, [activeTenantId, isAuthenticated]);
+  }, [activeClinicId, activeTenantId, isAuthenticated]);
+
+  const selectClinic = useCallback((id:string)=>{if(!clinics.some(x=>x.id===id))return;setSelectedClinicId(id);storeClinicId(id);setApiClinicId(id);void queryClient.cancelQueries();queryClient.removeQueries({predicate:q=>q.queryKey[0]==="tenant"&&q.queryKey[1]===activeTenantId&&q.queryKey[2]!=="clinics"});},[activeTenantId,clinics,queryClient]);
 
   const selectTenant = useCallback(
     (tenantId: string) => {
@@ -91,8 +106,9 @@ export function TenantProvider({ children }: PropsWithChildren) {
       hasTenant: Boolean(activeTenant),
       selectTenant,
       clearTenant,
+      clinics, activeClinic: clinics.find(x=>x.id===activeClinicId) ?? null, activeClinicId, selectClinic,
     }),
-    [activeTenant, activeTenantId, clearTenant, selectTenant, tenants],
+    [activeClinicId, activeTenant, activeTenantId, clearTenant, clinics, selectClinic, selectTenant, tenants],
   );
 
   return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;

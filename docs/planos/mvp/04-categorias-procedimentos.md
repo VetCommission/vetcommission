@@ -3,7 +3,7 @@
 **Objetivo:** disponibilizar o catálogo versionável usado pelas regras e produções.
 
 **Branch:** `<linear-id>-categorias-procedimentos`  
-**Dependência:** etapa 03.
+**Dependência:** etapa 03.5 — Clínicas do tenant e etapa 03 — Profissionais.
 
 ## Escopo
 
