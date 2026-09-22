@@ -130,7 +130,8 @@ export function ProfessionalsList() {
         <Button
           startIcon={<AddRoundedIcon />}
           variant="contained"
-          onClick={() => router.push("/app/profissionais/novo")}
+          component={Link}
+          href="/app/profissionais/novo"
         >
           Novo profissional
         </Button>

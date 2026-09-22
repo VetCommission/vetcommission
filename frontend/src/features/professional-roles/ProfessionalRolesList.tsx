@@ -13,12 +13,12 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { listProfessionalRoles } from "./professionalRolesApi";
 import { useTenant } from "@/features/auth/TenantProvider";
 
 export function ProfessionalRolesList() {
-  const router = useRouter();
   const { activeTenantId } = useTenant();
   const page = Math.max(1, Number(useSearchParams().get("page") ?? "1") || 1);
   const query = useQuery({
@@ -32,7 +32,7 @@ export function ProfessionalRolesList() {
         <Typography component="h1" variant="h4">
           Funções e cargos
         </Typography>
-        <Button variant="contained" onClick={() => router.push("/app/funcoes-cargos/novo")}>
+        <Button component={Link} href="/app/funcoes-cargos/novo" variant="contained">
           Novo cadastro
         </Button>
       </Stack>
@@ -60,14 +60,16 @@ export function ProfessionalRolesList() {
       {query.data ? (
         <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
           <Button
+            component={Link}
             disabled={page <= 1}
-            onClick={() => router.push(`/app/funcoes-cargos?page=${page - 1}`)}
+            href={`/app/funcoes-cargos?page=${page - 1}`}
           >
             Anterior
           </Button>
           <Button
+            component={Link}
             disabled={page >= query.data.totalPages}
-            onClick={() => router.push(`/app/funcoes-cargos?page=${page + 1}`)}
+            href={`/app/funcoes-cargos?page=${page + 1}`}
           >
             Próxima
           </Button>

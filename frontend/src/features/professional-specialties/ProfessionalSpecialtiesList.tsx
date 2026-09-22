@@ -13,12 +13,12 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { listProfessionalSpecialties } from "./professionalSpecialtiesApi";
 import { useTenant } from "@/features/auth/TenantProvider";
 
 export function ProfessionalSpecialtiesList() {
-  const router = useRouter();
   const { activeTenantId } = useTenant();
   const page = Math.max(1, Number(useSearchParams().get("page") ?? "1") || 1);
   const query = useQuery({
@@ -32,7 +32,7 @@ export function ProfessionalSpecialtiesList() {
         <Typography component="h1" variant="h4">
           Especialidades
         </Typography>
-        <Button variant="contained" onClick={() => router.push("/app/especialidades/novo")}>
+        <Button component={Link} href="/app/especialidades/novo" variant="contained">
           Novo cadastro
         </Button>
       </Stack>
@@ -60,14 +60,16 @@ export function ProfessionalSpecialtiesList() {
       {query.data ? (
         <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
           <Button
+            component={Link}
             disabled={page <= 1}
-            onClick={() => router.push(`/app/especialidades?page=${page - 1}`)}
+            href={`/app/especialidades?page=${page - 1}`}
           >
             Anterior
           </Button>
           <Button
+            component={Link}
             disabled={page >= query.data.totalPages}
-            onClick={() => router.push(`/app/especialidades?page=${page + 1}`)}
+            href={`/app/especialidades?page=${page + 1}`}
           >
             Próxima
           </Button>

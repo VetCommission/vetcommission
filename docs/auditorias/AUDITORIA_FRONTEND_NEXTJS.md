@@ -489,3 +489,38 @@ Esta seção substitui as conclusões conflitantes do diagnóstico inicial para 
 - Validação após estas alterações: lint passou, build passou e testes unitários backend permaneceram em 21/21.
 
 **Nota corrente:** 7,3/10 — parcialmente conforme. As listas existentes agora compartilham contrato paginado e a formatação é validável no CI; testes frontend, CI e E2E continuam pendentes.
+
+## Reavaliação complementar — Server/Client, acessibilidade e segurança
+
+### Adequações realizadas
+
+- As páginas de composição permanecem Server Components; a rota dinâmica de profissionais usa uma casca servidor em `src/app/app/profissionais/[id]/page.tsx` e uma ilha cliente explícita em `src/features/professionals/ProfessionalDetailsClient.tsx`.
+- `not-found.tsx` não precisa mais de `use client`; a rota `[id]` usa `notFound()` para identificadores inválidos e trata `404` autenticado da API sem expor detalhes técnicos. Erros diferentes de `404` são encaminhados ao `error.tsx`.
+- Componentes de autenticação com hooks continuam clientes por necessidade: `AuthProvider`, `TenantProvider`, `RequireAuth`, `RequireAcesso`, `HomeRedirect`, `LoginPage` e `AuthenticatedHome`. Componentes puramente visuais de estado podem ser reutilizados sem diretiva própria.
+- Navegação declarativa foi aplicada nas ações de criação e paginação de funções, especialidades e profissionais com `Link`. Os `router.replace` restantes estão associados a transições de autenticação, logout, mudança de filtros ou conclusão de mutação.
+- Selects receberam labels associadas, tabelas receberam nomes acessíveis, o diálogo de status recebeu relações ARIA e foco inicial seguro, e formulários direcionam foco para o primeiro erro retornado pela API.
+- Foi adicionado foco visível global em `src/app/globals.css` e ajustado o contraste de `text.secondary` em `src/theme/theme.ts`.
+- `frontend/next.config.ts` passou a gerar CSP report-only com `connect-src` derivado da URL configurada da API, `form-action`, `worker-src` e `X-Frame-Options: DENY`.
+- O plano exclusivo de testes, CI/CD e performance foi registrado em `docs/auditorias/PLANO_CI_CD_QUALIDADE_PERFORMANCE_FRONTEND.md`.
+
+### Situação atual por área
+
+| Área | Situação atual | Pendência principal |
+| --- | --- | --- |
+| Server/Client | Parcialmente conforme | Revisão dinâmica do bundle e dos componentes de autenticação em execução real |
+| Rota `[id]` e boundaries | Conforme para o contexto atual | `notFound()` nativo para 404 autenticado após sessão server-side |
+| Formulários | Parcialmente conforme | Testes automatizados dos erros e foco |
+| Acessibilidade estática | Parcialmente conforme | Auditoria dinâmica com axe, teclado e contraste em navegador |
+| Headers/CSP | Parcialmente conforme | Validar report-only em ambiente equivalente à produção e confirmar terminação TLS |
+| Performance | Não medida | Bundle, waterfalls, Core Web Vitals e budgets |
+| Testes frontend | Não configurado | Frente dedicada descrita no plano CI/CD |
+| GitHub Actions | Não configurado | Workflow e branch protection |
+| Token em `localStorage` | Aceito temporariamente | Migração futura para cookie seguro, fora do escopo atual |
+
+### Classificação atualizada
+
+Os achados de rota, navegação declarativa, contratos por feature, paginação, confirmação destrutiva e formatação ficam resolvidos tecnicamente. A redução de Client Components e a acessibilidade ficam parcialmente conformes porque ainda dependem de medição e validação dinâmica. Testes frontend, E2E, GitHub Actions, performance e validação operacional da CSP continuam pendentes e devem permanecer como bloqueadores de produção até serem implementados.
+
+**Nota técnica estimada atual: 7,7/10 — parcialmente conforme.** A base arquitetural está adequada para continuar a evolução do MVP, mas a nota não deve subir para nível plenamente conforme antes da frente dedicada de testes/CI/CD/performance.
+
+**Próxima frente formal:** executar o plano `PLANO_CI_CD_QUALIDADE_PERFORMANCE_FRONTEND.md`, sem misturar sua implementação com novas alterações funcionais.
