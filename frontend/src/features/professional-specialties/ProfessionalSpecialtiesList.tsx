@@ -40,7 +40,7 @@ export function ProfessionalSpecialtiesList() {
         <Alert severity="error">Não foi possível carregar especialidades.</Alert>
       ) : null}
       <Paper variant="outlined">
-        <Table>
+        <Table aria-label="Lista de especialidades">
           <TableHead>
             <TableRow>
               <TableCell>Nome</TableCell>

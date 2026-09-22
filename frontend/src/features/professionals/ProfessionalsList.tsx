@@ -14,6 +14,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControl,
+  InputLabel,
   MenuItem,
   Paper,
   Select,
@@ -150,19 +152,22 @@ export function ProfessionalsList() {
               updateUrl({ role: event.target.value || undefined, page: "1" });
             }}
           />
-          <Select
-            fullWidth
-            value={active}
-            onChange={(event) => {
-              setActive(event.target.value);
-              updateUrl({ active: event.target.value || undefined, page: "1" });
-            }}
-            aria-label="Status"
-          >
-            <MenuItem value="true">Ativos</MenuItem>
-            <MenuItem value="false">Inativos</MenuItem>
-            <MenuItem value="">Todos</MenuItem>
-          </Select>
+          <FormControl fullWidth>
+            <InputLabel id="professional-status-label">Status</InputLabel>
+            <Select
+              labelId="professional-status-label"
+              label="Status"
+              value={active}
+              onChange={(event) => {
+                setActive(event.target.value);
+                updateUrl({ active: event.target.value || undefined, page: "1" });
+              }}
+            >
+              <MenuItem value="true">Ativos</MenuItem>
+              <MenuItem value="false">Inativos</MenuItem>
+              <MenuItem value="">Todos</MenuItem>
+            </Select>
+          </FormControl>
         </Stack>
       </Paper>
       {query.isLoading ? <CircularProgress aria-label="Carregando profissionais" /> : null}
@@ -179,7 +184,7 @@ export function ProfessionalsList() {
       {data && data.items.length > 0 ? (
         <>
           <Paper variant="outlined" sx={{ overflowX: "auto" }}>
-            <Table sx={{ minWidth: 760 }}>
+            <Table aria-label="Lista de profissionais" sx={{ minWidth: 760 }}>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ width: 72 }} />
@@ -259,17 +264,20 @@ export function ProfessionalsList() {
         open={Boolean(pendingAction)}
         onClose={() => setPendingAction(null)}
         aria-labelledby="status-dialog-title"
+        aria-describedby="status-dialog-description"
       >
         <DialogTitle id="status-dialog-title">Confirmar alteração de status</DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <DialogContentText id="status-dialog-description">
             {pendingAction?.active
               ? `Deseja inativar ${pendingAction.name}?`
               : `Deseja ativar ${pendingAction?.name}?`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPendingAction(null)}>Cancelar</Button>
+          <Button autoFocus onClick={() => setPendingAction(null)}>
+            Cancelar
+          </Button>
           <Button variant="contained" onClick={confirmAction} disabled={statusMutation.isPending}>
             {statusMutation.isPending ? "Processando…" : "Confirmar"}
           </Button>

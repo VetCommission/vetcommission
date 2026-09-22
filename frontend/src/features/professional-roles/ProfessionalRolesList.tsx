@@ -40,7 +40,7 @@ export function ProfessionalRolesList() {
         <Alert severity="error">Não foi possível carregar funções e cargos.</Alert>
       ) : null}
       <Paper variant="outlined">
-        <Table>
+        <Table aria-label="Lista de funções e cargos">
           <TableHead>
             <TableRow>
               <TableCell>Nome</TableCell>

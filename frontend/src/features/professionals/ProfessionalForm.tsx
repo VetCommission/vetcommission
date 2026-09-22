@@ -68,6 +68,7 @@ export function ProfessionalForm({
     handleSubmit,
     reset,
     setError,
+    setFocus,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -107,6 +108,7 @@ export function ProfessionalForm({
           )
         ) {
           setError(field as keyof FormData, { type: "server", message });
+          setFocus(field as keyof FormData);
         }
       });
       setSubmitError(getApiErrorMessage(error, "Não foi possível salvar o profissional."));

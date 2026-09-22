@@ -21,6 +21,7 @@ export function MasterDataForm({ kind }: { kind: "role" | "specialty" }) {
     handleSubmit,
     reset,
     setError,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { name: "" } });
 
@@ -34,7 +35,10 @@ export function MasterDataForm({ kind }: { kind: "role" | "specialty" }) {
       router.replace(kind === "role" ? "/app/funcoes-cargos" : "/app/especialidades");
     } catch (error) {
       getApiFieldErrors(error).forEach(({ field, message }) => {
-        if (field === "name") setError("name", { type: "server", message });
+        if (field === "name") {
+          setError("name", { type: "server", message });
+          setFocus("name");
+        }
       });
       setSubmitError(getApiErrorMessage(error, "Não foi possível salvar o cadastro."));
     }
@@ -51,7 +55,6 @@ export function MasterDataForm({ kind }: { kind: "role" | "specialty" }) {
           label="Nome"
           error={Boolean(errors.name)}
           helperText={errors.name?.message}
-          aria-describedby={errors.name ? "master-data-name-error" : undefined}
           {...register("name")}
         />
         <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>

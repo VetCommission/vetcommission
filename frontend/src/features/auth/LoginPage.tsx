@@ -123,7 +123,7 @@ export function LoginPage() {
                   width={255}
                 />
               </Typography>
-              <Typography color="text.secondary" sx={{ mt: "10%" }}>
+              <Typography component="h1" color="text.secondary" sx={{ mt: "10%" }}>
                 Entre para continuar.
               </Typography>
             </Box>
