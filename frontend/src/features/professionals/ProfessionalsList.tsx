@@ -27,6 +27,7 @@ import {
   Typography,
 } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTenant } from "@/features/auth/TenantProvider";
 import { ApiError } from "@/lib/api/apiError";
@@ -213,7 +214,7 @@ export function ProfessionalsList() {
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <Button onClick={() => router.push(`/app/profissionais/${professional.id}`)}>
+                      <Button component={Link} href={`/app/profissionais/${professional.id}`}>
                         Visualizar
                       </Button>
                       <Button

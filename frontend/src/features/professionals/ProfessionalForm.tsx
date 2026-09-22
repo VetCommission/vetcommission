@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -158,7 +159,7 @@ export function ProfessionalForm({
           ))}
         </Select>
         <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
-          <Button type="button" onClick={() => router.push("/app/profissionais")}>
+          <Button component={Link} href="/app/profissionais" type="button">
             Voltar
           </Button>
           {isReadOnly ? (
