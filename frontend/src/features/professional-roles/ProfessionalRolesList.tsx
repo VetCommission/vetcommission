@@ -15,11 +15,13 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { listProfessionalRoles, setProfessionalRoleActive } from "./professionalRolesApi";
 import { useTenant } from "@/features/auth/TenantProvider";
 
 export function ProfessionalRolesList() {
   const { activeTenantId } = useTenant();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const statusMutation = useMutation({ mutationFn: ({ id, active }: { id: string; active: boolean }) => setProfessionalRoleActive(id, active), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tenant", activeTenantId, "professional-roles"] }) });
   const page = Math.max(1, Number(useSearchParams().get("page") ?? "1") || 1);
@@ -52,7 +54,7 @@ export function ProfessionalRolesList() {
           </TableHead>
           <TableBody>
             {query.data?.items.map((item) => (
-              <TableRow key={item.id} hover>
+              <TableRow key={item.id} hover onDoubleClick={() => router.push(`/app/funcoes-cargos/${item.id}`)} sx={{ cursor: "pointer" }}>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.active ? "Ativo" : "Inativo"}</TableCell>
                 <TableCell align="right"><Button component={Link} href={`/app/funcoes-cargos/${item.id}`}>Visualizar</Button><Button disabled={statusMutation.isPending} onClick={() => statusMutation.mutate({ id: item.id, active: !item.active })}>{item.active ? "Inativar" : "Ativar"}</Button></TableCell>

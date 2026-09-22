@@ -15,11 +15,13 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { listProfessionalSpecialties, setProfessionalSpecialtyActive } from "./professionalSpecialtiesApi";
 import { useTenant } from "@/features/auth/TenantProvider";
 
 export function ProfessionalSpecialtiesList() {
   const { activeTenantId } = useTenant();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const statusMutation = useMutation({ mutationFn: ({ id, active }: { id: string; active: boolean }) => setProfessionalSpecialtyActive(id, active), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tenant", activeTenantId, "professional-specialties"] }) });
   const page = Math.max(1, Number(useSearchParams().get("page") ?? "1") || 1);
@@ -52,7 +54,7 @@ export function ProfessionalSpecialtiesList() {
           </TableHead>
           <TableBody>
             {query.data?.items.map((item) => (
-              <TableRow key={item.id} hover>
+              <TableRow key={item.id} hover onDoubleClick={() => router.push(`/app/especialidades/${item.id}`)} sx={{ cursor: "pointer" }}>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.active ? "Ativo" : "Inativo"}</TableCell>
                 <TableCell align="right"><Button component={Link} href={`/app/especialidades/${item.id}`}>Visualizar</Button><Button disabled={statusMutation.isPending} onClick={() => statusMutation.mutate({ id: item.id, active: !item.active })}>{item.active ? "Inativar" : "Ativar"}</Button></TableCell>

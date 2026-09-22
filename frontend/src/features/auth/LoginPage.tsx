@@ -76,13 +76,23 @@ export function LoginPage() {
               minHeight: "100vh",
               position: "relative",
               borderRadius: 0,
+              overflow: "hidden",
               width: { md: "60%", lg: "65%" },
+              background: "#0b3d32",
               "&::after": {
                 background:
-                  "linear-gradient(115deg, rgba(7, 45, 35, 0.82) 0%, rgba(19, 105, 79, 0.55) 48%, rgba(19, 105, 79, 0.08) 100%)",
+                  "linear-gradient(115deg, rgba(4, 35, 28, 0.88) 0%, rgba(14, 91, 68, 0.56) 48%, rgba(19, 105, 79, 0.06) 100%)",
                 content: '""',
                 inset: 0,
                 position: "absolute",
+                zIndex: 1,
+              },
+              "&::before": {
+                background: "radial-gradient(circle at 18% 82%, rgba(255,255,255,.18), transparent 32%)",
+                content: '""',
+                inset: 0,
+                position: "absolute",
+                zIndex: 2,
               },
             }}
           >
@@ -92,7 +102,7 @@ export function LoginPage() {
               priority
               sizes="65vw"
               src="/assets/images/login-veterinary.webp"
-              style={{ borderRadius: 0, objectFit: "cover" }}
+              style={{ borderRadius: 0, objectFit: "cover", objectPosition: "center" }}
             />
           </Box>
           <Stack
@@ -107,6 +117,7 @@ export function LoginPage() {
               maxWidth: { md: 560, lg: 620 },
               p: { xs: 3, sm: 5, lg: 8 },
               width: { md: "40%", lg: "35%" },
+              boxShadow: { md: "-18px 0 45px rgba(15, 45, 35, .08)" },
             }}
           >
             <Box>

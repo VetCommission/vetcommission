@@ -198,7 +198,7 @@ export function ProfessionalsList() {
               </TableHead>
               <TableBody>
                 {data.items.map((professional) => (
-                  <TableRow key={professional.id} hover>
+                    <TableRow key={professional.id} hover onDoubleClick={() => router.push(`/app/profissionais/${professional.id}`)} sx={{ cursor: "pointer" }}>
                     <TableCell>
                       <Avatar>{professional.name.charAt(0).toUpperCase()}</Avatar>
                     </TableCell>

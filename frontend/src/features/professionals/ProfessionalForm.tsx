@@ -19,7 +19,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useTenant } from "@/features/auth/TenantProvider";
 import { listProfessionalRoles } from "@/features/professional-roles/professionalRolesApi";
@@ -66,6 +66,7 @@ export function ProfessionalForm({
   });
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setError,
@@ -117,10 +118,10 @@ export function ProfessionalForm({
   });
 
   return (
-    <Paper variant="outlined" sx={{ width: "100%", p: { xs: 3, md: 4 } }}>
+    <Paper variant="outlined" sx={{ width: "100%", p: { xs: 3, sm: 4, md: 5 } }}>
       <Stack
         component="form"
-        spacing={2}
+        spacing={3}
         onSubmit={handleSubmit((data) => {
           setSubmitError(null);
           mutation.mutate(data);
@@ -161,11 +162,10 @@ export function ProfessionalForm({
         />
         <FormControl disabled={isReadOnly || rolesQuery.isLoading} error={Boolean(errors.role)}>
           <InputLabel id="professional-role-label">Função ou cargo</InputLabel>
-          <Select
+          <Controller name="role" control={control} render={({ field }) => <Select
             labelId="professional-role-label"
             label="Função ou cargo"
-            defaultValue={professional?.role ?? ""}
-            {...register("role")}
+            {...field}
           >
             <MenuItem value="" disabled>
               Selecione a função ou cargo
@@ -175,10 +175,11 @@ export function ProfessionalForm({
                 {item.name}
               </MenuItem>
             ))}
-          </Select>
+          </Select>} />
           <FormHelperText>{errors.role?.message}</FormHelperText>
         </FormControl>
         </Box>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
         <TextField
           disabled={isReadOnly}
           label="Registro profissional"
@@ -191,11 +192,10 @@ export function ProfessionalForm({
           error={Boolean(errors.specialty)}
         >
           <InputLabel id="professional-specialty-label">Especialidade</InputLabel>
-          <Select
+          <Controller name="specialty" control={control} render={({ field }) => <Select
             labelId="professional-specialty-label"
             label="Especialidade"
-            defaultValue={professional?.specialty ?? ""}
-            {...register("specialty")}
+            {...field}
           >
             <MenuItem value="">Selecione a especialidade</MenuItem>
             {specialtiesQuery.data?.items.map((item) => (
@@ -203,15 +203,16 @@ export function ProfessionalForm({
                 {item.name}
               </MenuItem>
             ))}
-          </Select>
+          </Select>} />
           <FormHelperText>{errors.specialty?.message}</FormHelperText>
         </FormControl>
-        <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
+        </Box>
+        <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end", pt: 2, mt: 1, borderTop: "1px solid", borderColor: "divider" }}>
           <Button component={Link} href="/app/profissionais" type="button">
             Voltar
           </Button>
           {isReadOnly ? (
-            <Button type="button" onClick={() => setMode("edit")} variant="contained">
+            <Button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setMode("edit"); }} variant="contained">
               Editar
             </Button>
           ) : (

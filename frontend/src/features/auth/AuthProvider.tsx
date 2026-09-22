@@ -28,7 +28,16 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const queryClient = useQueryClient();
-  const [accessToken, setAccessToken] = useState<string | null>(() => readStoredAccessToken());
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [storageReady, setStorageReady] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setAccessToken(readStoredAccessToken());
+      setStorageReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (accessToken) {
@@ -39,7 +48,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const currentSessionQuery = useQuery({
     queryKey: ["auth", "me"],
     queryFn: getCurrentSession,
-    enabled: Boolean(accessToken),
+    enabled: storageReady && Boolean(accessToken),
     retry: false,
   });
 
@@ -84,7 +93,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       isAuthenticated: Boolean(
         accessToken && currentSessionQuery.data && !currentSessionQuery.isError,
       ),
-      isLoading: currentSessionQuery.isLoading || loginMutation.isPending,
+      isLoading: !storageReady || currentSessionQuery.isLoading || loginMutation.isPending,
       login,
       logout: clearSession,
     }),
@@ -96,6 +105,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       currentSessionQuery.isError,
       login,
       loginMutation.isPending,
+      storageReady,
     ],
   );
 

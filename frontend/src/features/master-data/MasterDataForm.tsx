@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,12 +10,15 @@ import { z } from "zod";
 import { saveProfessionalRole } from "@/features/professional-roles/professionalRolesApi";
 import { saveProfessionalSpecialty } from "@/features/professional-specialties/professionalSpecialtiesApi";
 import { getApiErrorMessage, getApiFieldErrors } from "@/lib/api/apiError";
+import { useTenant } from "@/features/auth/TenantProvider";
 
 const schema = z.object({ name: z.string().trim().min(1, "Informe o nome.").max(120) });
 type FormData = z.infer<typeof schema>;
 
 export function MasterDataForm({ kind, id, initialName = "", initialMode = "create" }: { kind: "role" | "specialty"; id?: string; initialName?: string; initialMode?: "create" | "view" | "edit" }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { activeTenantId } = useTenant();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [mode, setMode] = useState(initialMode);
   const {
@@ -32,6 +36,9 @@ export function MasterDataForm({ kind, id, initialName = "", initialMode = "crea
       await (kind === "role"
         ? saveProfessionalRole(data.name, id)
         : saveProfessionalSpecialty(data.name, id));
+      const listQueryKey = ["tenant", activeTenantId, "professional-" + (kind === "role" ? "roles" : "specialties")];
+      await queryClient.invalidateQueries({ queryKey: listQueryKey, refetchType: "all" });
+      await queryClient.refetchQueries({ queryKey: listQueryKey, type: "all" });
       reset({ name: "" });
       router.replace(kind === "role" ? "/app/funcoes-cargos" : "/app/especialidades");
     } catch (error) {
@@ -46,8 +53,8 @@ export function MasterDataForm({ kind, id, initialName = "", initialMode = "crea
   };
 
   return (
-    <Paper variant="outlined" sx={{ width: "100%", p: 4 }}>
-      <Stack component="form" spacing={2} onSubmit={handleSubmit(submit)} noValidate>
+    <Paper variant="outlined" sx={{ width: "100%", p: { xs: 3, sm: 4, md: 5 } }}>
+      <Stack component="form" spacing={3} onSubmit={handleSubmit(submit)} noValidate>
         <Typography component="h1" variant="h4">
           {kind === "role" ? "Nova função ou cargo" : "Nova especialidade"}
         </Typography>
@@ -58,11 +65,11 @@ export function MasterDataForm({ kind, id, initialName = "", initialMode = "crea
           helperText={errors.name?.message}
           {...register("name")}
         />
-        <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
+        <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end", pt: 2, mt: 1, borderTop: "1px solid", borderColor: "divider" }}>
           <Button type="button" onClick={() => router.back()}>
             Voltar
           </Button>
-          {mode === "view" ? <Button type="button" variant="contained" onClick={() => setMode("edit")}>Editar</Button> : <Button disabled={isSubmitting} type="submit" variant="contained">
+          {mode === "view" ? <Button type="button" variant="contained" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setMode("edit"); }}>Editar</Button> : <Button disabled={isSubmitting} type="submit" variant="contained">
             {isSubmitting ? "Salvando…" : "Salvar"}
           </Button>}
         </Stack>
