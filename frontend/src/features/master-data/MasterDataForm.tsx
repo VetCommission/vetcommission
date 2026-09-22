@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { saveProfessionalRole } from "@/features/professional-roles/professionalRolesApi";
 import { saveProfessionalSpecialty } from "@/features/professional-specialties/professionalSpecialtiesApi";
-import { ApiError } from "@/lib/api/apiError";
+import { getApiErrorMessage, getApiFieldErrors } from "@/lib/api/apiError";
 
 const schema = z.object({ name: z.string().trim().min(1, "Informe o nome.").max(120) });
 type FormData = z.infer<typeof schema>;
@@ -19,19 +19,24 @@ export function MasterDataForm({ kind }: { kind: "role" | "specialty" }) {
   const {
     register,
     handleSubmit,
+    reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { name: "" } });
+
   const submit = async (data: FormData) => {
     setSubmitError(null);
     try {
       await (kind === "role"
         ? saveProfessionalRole(data.name)
         : saveProfessionalSpecialty(data.name));
+      reset({ name: "" });
       router.replace(kind === "role" ? "/app/funcoes-cargos" : "/app/especialidades");
     } catch (error) {
-      setSubmitError(
-        error instanceof ApiError ? error.message : "Não foi possível salvar o cadastro.",
-      );
+      getApiFieldErrors(error).forEach(({ field, message }) => {
+        if (field === "name") setError("name", { type: "server", message });
+      });
+      setSubmitError(getApiErrorMessage(error, "Não foi possível salvar o cadastro."));
     }
   };
 
@@ -41,11 +46,7 @@ export function MasterDataForm({ kind }: { kind: "role" | "specialty" }) {
         <Typography component="h1" variant="h4">
           {kind === "role" ? "Nova função ou cargo" : "Nova especialidade"}
         </Typography>
-        {submitError ? (
-          <Alert severity="error" role="alert">
-            {submitError}
-          </Alert>
-        ) : null}
+        {submitError ? <Alert severity="error">{submitError}</Alert> : null}
         <TextField
           label="Nome"
           error={Boolean(errors.name)}

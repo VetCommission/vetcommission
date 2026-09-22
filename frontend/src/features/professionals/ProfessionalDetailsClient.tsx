@@ -25,6 +25,10 @@ export function ProfessionalDetailsClient({ id }: ProfessionalDetailsClientProps
     enabled: Boolean(activeTenantId),
   });
 
+  if (query.isError && !(query.error instanceof ApiError && query.error.status === 404)) {
+    throw query.error;
+  }
+
   return (
     <RequireAcesso recurso={accessResources.professionalsManage}>
       <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>
