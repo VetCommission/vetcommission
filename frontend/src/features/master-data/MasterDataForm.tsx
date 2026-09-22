@@ -46,7 +46,7 @@ export function MasterDataForm({ kind, id, initialName = "", initialMode = "crea
   };
 
   return (
-    <Paper variant="outlined" sx={{ p: 4 }}>
+    <Paper variant="outlined" sx={{ width: "100%", p: 4 }}>
       <Stack component="form" spacing={2} onSubmit={handleSubmit(submit)} noValidate>
         <Typography component="h1" variant="h4">
           {kind === "role" ? "Nova função ou cargo" : "Nova especialidade"}

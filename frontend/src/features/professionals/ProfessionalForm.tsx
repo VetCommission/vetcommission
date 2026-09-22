@@ -117,7 +117,7 @@ export function ProfessionalForm({
   });
 
   return (
-    <Paper variant="outlined" sx={{ p: { xs: 3, md: 4 } }}>
+    <Paper variant="outlined" sx={{ width: "100%", p: { xs: 3, md: 4 } }}>
       <Stack
         component="form"
         spacing={2}

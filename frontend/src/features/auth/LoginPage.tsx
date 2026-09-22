@@ -46,8 +46,8 @@ export function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      senha: "",
+      email: process.env.NODE_ENV === "development" ? "admin@vetcommission.local" : "",
+      senha: process.env.NODE_ENV === "development" ? "qwas" : "",
     },
   });
 
@@ -117,7 +117,7 @@ export function LoginPage() {
                 sx={{ fontWeight: 700, mb: 4, textAlign: "center" }}
               >
                 <Image
-                  alt="VetCommission"
+                  alt="VetCom"
                   height={64}
                   src="/assets/brand/vetcom-logo.svg"
                   width={255}

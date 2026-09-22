@@ -41,7 +41,7 @@ export function ProfessionalRolesList() {
       {query.isError ? (
         <Alert severity="error">Não foi possível carregar funções e cargos.</Alert>
       ) : null}
-      <Paper variant="outlined">
+      <Paper variant="outlined" sx={{ width: "100%", overflowX: "auto" }}>
         <Table aria-label="Lista de funções e cargos">
           <TableHead>
             <TableRow>

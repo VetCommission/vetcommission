@@ -41,7 +41,7 @@ export function ProfessionalSpecialtiesList() {
       {query.isError ? (
         <Alert severity="error">Não foi possível carregar especialidades.</Alert>
       ) : null}
-      <Paper variant="outlined">
+      <Paper variant="outlined" sx={{ width: "100%", overflowX: "auto" }}>
         <Table aria-label="Lista de especialidades">
           <TableHead>
             <TableRow>
