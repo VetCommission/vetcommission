@@ -29,6 +29,8 @@ public partial class Clinic
 
     public virtual ICollection<ProcedureCategory> ProcedureCategories { get; set; } = new List<ProcedureCategory>();
 
+    public virtual ICollection<Procedure> Procedures { get; set; } = new List<Procedure>();
+
     public virtual ICollection<ProfessionalRole> ProfessionalRoles { get; set; } = new List<ProfessionalRole>();
 
     public virtual ICollection<ProfessionalSpecialty> ProfessionalSpecialties { get; set; } = new List<ProfessionalSpecialty>();

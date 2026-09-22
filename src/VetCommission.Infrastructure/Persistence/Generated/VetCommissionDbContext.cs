@@ -22,6 +22,8 @@ public partial class VetCommissionDbContext : DbContext
 
     public virtual DbSet<DatabaseVersion> DatabaseVersions { get; set; }
 
+    public virtual DbSet<Procedure> Procedures { get; set; }
+
     public virtual DbSet<ProcedureCategory> ProcedureCategories { get; set; }
 
     public virtual DbSet<Professional> Professionals { get; set; }
@@ -211,6 +213,57 @@ public partial class VetCommissionDbContext : DbContext
             entity.Property(e => e.Version)
                 .HasMaxLength(20)
                 .HasColumnName("version");
+        });
+
+        modelBuilder.Entity<Procedure>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_procedure");
+
+            entity.ToTable("procedure", "business");
+
+            entity.HasIndex(e => new { e.TenantId, e.ClinicId, e.CategoryId, e.Active }, "ix_procedure_tenant_clinic_category_active");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Active)
+                .HasDefaultValue(true)
+                .HasColumnName("active");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.ClinicId).HasColumnName("clinic_id");
+            entity.Property(e => e.Code)
+                .HasMaxLength(60)
+                .HasColumnName("code");
+            entity.Property(e => e.CreatedAtUtc)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at_utc");
+            entity.Property(e => e.DefaultValue)
+                .HasPrecision(12, 2)
+                .HasColumnName("default_value");
+            entity.Property(e => e.Description)
+                .HasMaxLength(500)
+                .HasColumnName("description");
+            entity.Property(e => e.InactivatedAtUtc).HasColumnName("inactivated_at_utc");
+            entity.Property(e => e.Name)
+                .HasMaxLength(160)
+                .HasColumnName("name");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Procedures)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_procedure_category");
+
+            entity.HasOne(d => d.Clinic).WithMany(p => p.Procedures)
+                .HasForeignKey(d => d.ClinicId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_procedure_clinic");
+
+            entity.HasOne(d => d.Tenant).WithMany(p => p.Procedures)
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_procedure_tenant");
         });
 
         modelBuilder.Entity<ProcedureCategory>(entity =>

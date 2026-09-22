@@ -10,4 +10,5 @@ export const endpoints = {
   professionalSpecialties: "/api/especialidades",
   clinics: "/api/clinicas",
   procedureCategories: "/api/categorias-procedimentos",
+  procedures: "/api/procedimentos",
 } as const;

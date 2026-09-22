@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace VetCommission.Infrastructure.Persistence.Generated.Entities;
 
-public partial class ProcedureCategory
+public partial class Procedure
 {
     public Guid Id { get; set; }
 
@@ -11,9 +11,15 @@ public partial class ProcedureCategory
 
     public Guid ClinicId { get; set; }
 
+    public Guid CategoryId { get; set; }
+
+    public string? Code { get; set; }
+
     public string Name { get; set; } = null!;
 
     public string? Description { get; set; }
+
+    public decimal DefaultValue { get; set; }
 
     public bool Active { get; set; }
 
@@ -23,9 +29,9 @@ public partial class ProcedureCategory
 
     public DateTime? InactivatedAtUtc { get; set; }
 
-    public virtual Clinic Clinic { get; set; } = null!;
+    public virtual ProcedureCategory Category { get; set; } = null!;
 
-    public virtual ICollection<Procedure> Procedures { get; set; } = new List<Procedure>();
+    public virtual Clinic Clinic { get; set; } = null!;
 
     public virtual Tenant Tenant { get; set; } = null!;
 }
