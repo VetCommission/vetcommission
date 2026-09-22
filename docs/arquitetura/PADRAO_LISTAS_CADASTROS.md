@@ -14,3 +14,7 @@ Todo cadastro deve invalidar a consulta da lista após uma criação, edição o
 Nunca usar apenas `['tenant', '<recurso>']`, pois essa chave não corresponde às consultas paginadas que incluem o tenant ativo.
 
 O mesmo padrão deve ser aplicado a clínicas, funções/cargos, especialidades, profissionais e aos próximos cadastros.
+
+## Regra do modo de edição
+
+O modo (`create`, `view` ou `edit`) deve ser mantido em estado local do formulário. O carregamento dos dados deve ocorrer por `defaultValues` quando a query estiver pronta ou por uma atualização explícita do formulário, sem reinitializar o componente nem alterar o modo atual. O botão `Editar` deve ser `type="button"`, para não submeter o formulário nem redirecionar a tela.
