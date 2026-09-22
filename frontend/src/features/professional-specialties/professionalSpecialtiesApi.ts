@@ -19,3 +19,6 @@ export async function saveProfessionalSpecialty(name: string, id?: string) {
       : apiClient.post(endpoints.professionalSpecialties, { name }))
   ).data;
 }
+export async function setProfessionalSpecialtyActive(id: string, active: boolean) {
+  return (await apiClient.post(`${endpoints.professionalSpecialties}/${id}/${active ? "ativar" : "inativar"}`)).data;
+}

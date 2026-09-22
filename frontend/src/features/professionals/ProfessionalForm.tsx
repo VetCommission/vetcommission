@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
+  Box,
   Button,
   FormControl,
   FormHelperText,
@@ -136,6 +137,7 @@ export function ProfessionalForm({
         {specialtiesQuery.isError ? (
           <Alert severity="error">Não foi possível carregar especialidades.</Alert>
         ) : null}
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "2fr 1.4fr 1fr" }, gap: 2 }}>
         <TextField
           disabled={isReadOnly}
           label="Nome"
@@ -176,6 +178,7 @@ export function ProfessionalForm({
           </Select>
           <FormHelperText>{errors.role?.message}</FormHelperText>
         </FormControl>
+        </Box>
         <TextField
           disabled={isReadOnly}
           label="Registro profissional"

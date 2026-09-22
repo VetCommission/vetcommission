@@ -13,9 +13,10 @@ import { getApiErrorMessage, getApiFieldErrors } from "@/lib/api/apiError";
 const schema = z.object({ name: z.string().trim().min(1, "Informe o nome.").max(120) });
 type FormData = z.infer<typeof schema>;
 
-export function MasterDataForm({ kind }: { kind: "role" | "specialty" }) {
+export function MasterDataForm({ kind, id, initialName = "", initialMode = "create" }: { kind: "role" | "specialty"; id?: string; initialName?: string; initialMode?: "create" | "view" | "edit" }) {
   const router = useRouter();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [mode, setMode] = useState(initialMode);
   const {
     register,
     handleSubmit,
@@ -23,14 +24,14 @@ export function MasterDataForm({ kind }: { kind: "role" | "specialty" }) {
     setError,
     setFocus,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { name: "" } });
+  } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { name: initialName } });
 
   const submit = async (data: FormData) => {
     setSubmitError(null);
     try {
       await (kind === "role"
-        ? saveProfessionalRole(data.name)
-        : saveProfessionalSpecialty(data.name));
+        ? saveProfessionalRole(data.name, id)
+        : saveProfessionalSpecialty(data.name, id));
       reset({ name: "" });
       router.replace(kind === "role" ? "/app/funcoes-cargos" : "/app/especialidades");
     } catch (error) {
@@ -51,7 +52,7 @@ export function MasterDataForm({ kind }: { kind: "role" | "specialty" }) {
           {kind === "role" ? "Nova função ou cargo" : "Nova especialidade"}
         </Typography>
         {submitError ? <Alert severity="error">{submitError}</Alert> : null}
-        <TextField
+        <TextField disabled={mode === "view"}
           label="Nome"
           error={Boolean(errors.name)}
           helperText={errors.name?.message}
@@ -61,9 +62,9 @@ export function MasterDataForm({ kind }: { kind: "role" | "specialty" }) {
           <Button type="button" onClick={() => router.back()}>
             Voltar
           </Button>
-          <Button disabled={isSubmitting} type="submit" variant="contained">
+          {mode === "view" ? <Button type="button" variant="contained" onClick={() => setMode("edit")}>Editar</Button> : <Button disabled={isSubmitting} type="submit" variant="contained">
             {isSubmitting ? "Salvando…" : "Salvar"}
-          </Button>
+          </Button>}
         </Stack>
       </Stack>
     </Paper>

@@ -19,3 +19,6 @@ export async function saveProfessionalRole(name: string, id?: string) {
       : apiClient.post(endpoints.professionalRoles, { name }))
   ).data;
 }
+export async function setProfessionalRoleActive(id: string, active: boolean) {
+  return (await apiClient.post(`${endpoints.professionalRoles}/${id}/${active ? "ativar" : "inativar"}`)).data;
+}

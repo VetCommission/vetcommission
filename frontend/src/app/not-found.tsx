@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Button, Stack, Typography } from "@mui/material";
 
 export default function NotFound() {
@@ -7,7 +6,7 @@ export default function NotFound() {
       <Typography component="h1" variant="h4">
         Página não encontrada
       </Typography>
-      <Button component={Link} href="/app" variant="contained">
+      <Button href="/app" variant="contained">
         Voltar ao início
       </Button>
     </Stack>

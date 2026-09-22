@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Button,
@@ -15,11 +15,13 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { listProfessionalRoles } from "./professionalRolesApi";
+import { listProfessionalRoles, setProfessionalRoleActive } from "./professionalRolesApi";
 import { useTenant } from "@/features/auth/TenantProvider";
 
 export function ProfessionalRolesList() {
   const { activeTenantId } = useTenant();
+  const queryClient = useQueryClient();
+  const statusMutation = useMutation({ mutationFn: ({ id, active }: { id: string; active: boolean }) => setProfessionalRoleActive(id, active), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tenant", activeTenantId, "professional-roles"] }) });
   const page = Math.max(1, Number(useSearchParams().get("page") ?? "1") || 1);
   const query = useQuery({
     queryKey: ["tenant", activeTenantId, "professional-roles", "list", page],
@@ -45,6 +47,7 @@ export function ProfessionalRolesList() {
             <TableRow>
               <TableCell>Nome</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell align="right">Ações</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -52,6 +55,7 @@ export function ProfessionalRolesList() {
               <TableRow key={item.id} hover>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.active ? "Ativo" : "Inativo"}</TableCell>
+                <TableCell align="right"><Button component={Link} href={`/app/funcoes-cargos/${item.id}`}>Visualizar</Button><Button disabled={statusMutation.isPending} onClick={() => statusMutation.mutate({ id: item.id, active: !item.active })}>{item.active ? "Inativar" : "Ativar"}</Button></TableCell>
               </TableRow>
             ))}
           </TableBody>
