@@ -10,7 +10,6 @@ import {
   FormHelperText,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   Stack,
   TextField,
@@ -28,6 +27,7 @@ import { getApiErrorMessage, getApiFieldErrors } from "@/lib/api/apiError";
 import { professionalQueryKeys } from "./professionalQueryKeys";
 import type { Professional, ProfessionalInput } from "./professionalTypes";
 import { createProfessional, updateProfessional } from "./professionalsApi";
+import { CrudFormShell } from "@/components/forms/CrudFormShell";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Informe o nome.").max(160),
@@ -118,15 +118,11 @@ export function ProfessionalForm({
   });
 
   return (
-    <Paper variant="outlined" sx={{ width: "100%", p: { xs: 3, sm: 4, md: 5 } }}>
+    <CrudFormShell title={mode === "create" ? "Novo profissional" : "Profissional"} mode={mode} listHref="/app/profissionais" isSubmitting={mutation.isPending} onEdit={() => setMode("edit")} onSubmit={handleSubmit((data) => { setSubmitError(null); mutation.mutate(data); })}>
       <Stack
-        component="form"
+        component="div"
         spacing={3}
-        onSubmit={handleSubmit((data) => {
-          setSubmitError(null);
-          mutation.mutate(data);
-        })}
-        noValidate
+        onSubmit={undefined}
       >
         <Typography component="h1" variant="h4">
           {mode === "create" ? "Novo profissional" : "Profissional"}
@@ -207,7 +203,7 @@ export function ProfessionalForm({
           <FormHelperText>{errors.specialty?.message}</FormHelperText>
         </FormControl>
         </Box>
-        <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end", pt: 2, mt: 1, borderTop: "1px solid", borderColor: "divider" }}>
+        <Stack direction="row" spacing={2} sx={{ display: "none" }}>
           <Button component={Link} href="/app/profissionais" type="button">
             Voltar
           </Button>
@@ -222,6 +218,6 @@ export function ProfessionalForm({
           )}
         </Stack>
       </Stack>
-    </Paper>
+    </CrudFormShell>
   );
 }

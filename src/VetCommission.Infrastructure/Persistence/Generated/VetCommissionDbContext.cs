@@ -22,6 +22,8 @@ public partial class VetCommissionDbContext : DbContext
 
     public virtual DbSet<DatabaseVersion> DatabaseVersions { get; set; }
 
+    public virtual DbSet<ProcedureCategory> ProcedureCategories { get; set; }
+
     public virtual DbSet<Professional> Professionals { get; set; }
 
     public virtual DbSet<ProfessionalRole> ProfessionalRoles { get; set; }
@@ -209,6 +211,45 @@ public partial class VetCommissionDbContext : DbContext
             entity.Property(e => e.Version)
                 .HasMaxLength(20)
                 .HasColumnName("version");
+        });
+
+        modelBuilder.Entity<ProcedureCategory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_procedure_category");
+
+            entity.ToTable("procedure_category", "business");
+
+            entity.HasIndex(e => new { e.TenantId, e.ClinicId, e.Active }, "ix_procedure_category_tenant_clinic_active");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Active)
+                .HasDefaultValue(true)
+                .HasColumnName("active");
+            entity.Property(e => e.ClinicId).HasColumnName("clinic_id");
+            entity.Property(e => e.CreatedAtUtc)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at_utc");
+            entity.Property(e => e.Description)
+                .HasMaxLength(500)
+                .HasColumnName("description");
+            entity.Property(e => e.InactivatedAtUtc).HasColumnName("inactivated_at_utc");
+            entity.Property(e => e.Name)
+                .HasMaxLength(160)
+                .HasColumnName("name");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+
+            entity.HasOne(d => d.Clinic).WithMany(p => p.ProcedureCategories)
+                .HasForeignKey(d => d.ClinicId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_procedure_category_clinic");
+
+            entity.HasOne(d => d.Tenant).WithMany(p => p.ProcedureCategories)
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_procedure_category_tenant");
         });
 
         modelBuilder.Entity<Professional>(entity =>

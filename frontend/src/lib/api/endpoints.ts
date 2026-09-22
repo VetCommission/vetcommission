@@ -9,4 +9,5 @@ export const endpoints = {
   professionalRoles: "/api/funcoes-cargos",
   professionalSpecialties: "/api/especialidades",
   clinics: "/api/clinicas",
+  procedureCategories: "/api/categorias-procedimentos",
 } as const;

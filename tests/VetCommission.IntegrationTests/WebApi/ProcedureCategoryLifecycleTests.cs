@@ -1,0 +1,8 @@
+using System.Net; using System.Net.Http.Headers; using System.Net.Http.Json; using System.Text.Json; using FluentAssertions;
+namespace VetCommission.IntegrationTests.WebApi;
+[Collection(WebApiCollection.Name)] public sealed class ProcedureCategoryLifecycleTests(WebApiTestFactory factory)
+{
+ const string Tenant="11111111-1111-1111-1111-111111111111"; const string Clinic="77777777-7777-7777-7777-777777777771";
+ [Fact] public async Task Category_CanGetUpdateAndDeactivate(){using var c=await Client();var create=await c.PostAsJsonAsync("/api/categorias-procedimentos",new{name="Categoria ciclo",description="Inicial"});create.StatusCode.Should().Be(HttpStatusCode.OK);using var body=JsonDocument.Parse(await create.Content.ReadAsStringAsync());var id=body.RootElement.GetProperty("id").GetGuid();var get=await c.GetAsync($"/api/categorias-procedimentos/{id}");get.StatusCode.Should().Be(HttpStatusCode.OK);var update=await c.PutAsJsonAsync($"/api/categorias-procedimentos/{id}",new{name="Categoria atualizada",description="Alterada"});update.StatusCode.Should().Be(HttpStatusCode.OK);var off=await c.PostAsync($"/api/categorias-procedimentos/{id}/inativar",null);off.StatusCode.Should().Be(HttpStatusCode.OK);}
+ async Task<HttpClient> Client(){var c=factory.CreateClient();var login=await c.PostAsJsonAsync("/api/auth/login",new{email="admin@vetcommission.local",senha="qwas"});login.EnsureSuccessStatusCode();using var p=JsonDocument.Parse(await login.Content.ReadAsStringAsync());c.DefaultRequestHeaders.Authorization=new AuthenticationHeaderValue("Bearer",p.RootElement.GetProperty("accessToken").GetString());c.DefaultRequestHeaders.Add("X-Tenant-Id",Tenant);c.DefaultRequestHeaders.Add("X-Clinic-Id",Clinic);return c;}
+}

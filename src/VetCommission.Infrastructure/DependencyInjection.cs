@@ -10,6 +10,7 @@ using VetCommission.Application.Features.ProfessionalMasterData;
 using VetCommission.Application.Features.ProfessionalRoles;
 using VetCommission.Application.Features.ProfessionalSpecialties;
 using VetCommission.Application.Features.Clinics;
+using VetCommission.Application.Features.ProcedureCategories;
 using VetCommission.Infrastructure.Clinics;
 
 namespace VetCommission.Infrastructure;
@@ -35,6 +36,7 @@ public static class DependencyInjection
             services.AddScoped<IProfessionalRoleRepository, ProfessionalRoleRepository>();
             services.AddScoped<IProfessionalSpecialtyRepository, ProfessionalSpecialtyRepository>();
             services.AddScoped<IClinicRepository, ClinicRepository>();
+            services.AddScoped<IProcedureCategoryRepository, ProcedureCategoryRepository>();
         }
         else
         {
@@ -44,6 +46,7 @@ public static class DependencyInjection
             services.AddScoped<IProfessionalRoleRepository, UnavailableProfessionalRoleRepository>();
             services.AddScoped<IProfessionalSpecialtyRepository, UnavailableProfessionalSpecialtyRepository>();
             services.AddScoped<IClinicRepository, UnavailableClinicRepository>();
+            services.AddScoped<IProcedureCategoryRepository, UnavailableProcedureCategoryRepository>();
         }
 
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();

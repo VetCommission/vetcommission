@@ -10,6 +10,7 @@ public static class AccessResources
     public const string ProfessionalRolesManage = "funcoes-cargos.gerenciar";
     public const string ProfessionalSpecialtiesManage = "especialidades.gerenciar";
     public const string ClinicsManage = "clinicas.gerenciar";
+    public const string ProcedureCategoriesManage = "categorias-procedimentos.gerenciar";
 
     public static readonly IReadOnlyCollection<string> All =
     [
@@ -21,5 +22,6 @@ public static class AccessResources
         ,ProfessionalRolesManage
         ,ProfessionalSpecialtiesManage
         ,ClinicsManage
+        ,ProcedureCategoriesManage
     ];
 }

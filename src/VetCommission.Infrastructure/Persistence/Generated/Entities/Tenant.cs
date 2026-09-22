@@ -23,6 +23,8 @@ public partial class Tenant
 
     public virtual ICollection<Clinic> Clinics { get; set; } = new List<Clinic>();
 
+    public virtual ICollection<ProcedureCategory> ProcedureCategories { get; set; } = new List<ProcedureCategory>();
+
     public virtual ICollection<ProfessionalRole> ProfessionalRoles { get; set; } = new List<ProfessionalRole>();
 
     public virtual ICollection<ProfessionalSpecialty> ProfessionalSpecialties { get; set; } = new List<ProfessionalSpecialty>();

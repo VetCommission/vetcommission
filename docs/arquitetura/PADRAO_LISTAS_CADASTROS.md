@@ -15,6 +15,16 @@ Nunca usar apenas `['tenant', '<recurso>']`, pois essa chave não corresponde à
 
 O mesmo padrão deve ser aplicado a clínicas, funções/cargos, especialidades, profissionais e aos próximos cadastros.
 
+## Regra obrigatória de testes
+
+Toda funcionalidade nova deve ser entregue com testes correspondentes:
+
+- testes unitários para handlers, validações e regras de negócio;
+- testes de integração para persistência, isolamento por tenant/clínica e endpoints HTTP;
+- testes de aceitação/E2E quando houver uma jornada completa de frontend.
+
+Uma funcionalidade não deve ser considerada concluída enquanto seu comportamento principal não possuir evidência automatizada adequada ao nível em que opera.
+
 ## Regra do modo de edição
 
 O modo (`create`, `view` ou `edit`) deve ser mantido em estado local do formulário. O carregamento dos dados deve ocorrer por `defaultValues` quando a query estiver pronta ou por uma atualização explícita do formulário, sem reinitializar o componente nem alterar o modo atual. O botão `Editar` deve ser `type="button"`, para não submeter o formulário nem redirecionar a tela.
