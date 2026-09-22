@@ -17,5 +17,9 @@ public partial class ProfessionalRole
 
     public DateTime? UpdatedAtUtc { get; set; }
 
+    public Guid ClinicId { get; set; }
+
+    public virtual Clinic Clinic { get; set; } = null!;
+
     public virtual Tenant Tenant { get; set; } = null!;
 }

@@ -2,9 +2,11 @@ import axios from "axios";
 import { toApiError } from "./apiError";
 
 const tenantHeaderName = "X-Tenant-Id";
+const clinicHeaderName = "X-Clinic-Id";
 
 let accessToken: string | null = null;
 let activeTenantId: string | null = null;
+let activeClinicId: string | null = null;
 
 export function getApiBaseUrl(): string | undefined {
   const configuredUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
@@ -44,6 +46,8 @@ apiClient.interceptors.request.use((config) => {
   } else {
     delete config.headers[tenantHeaderName];
   }
+  if (activeClinicId) config.headers[clinicHeaderName] = activeClinicId;
+  else delete config.headers[clinicHeaderName];
 
   return config;
 });
@@ -64,4 +68,7 @@ export function setApiTenantId(tenantId: string | null) {
 export function clearApiSession() {
   accessToken = null;
   activeTenantId = null;
+  activeClinicId = null;
 }
+
+export function setApiClinicId(clinicId: string | null) { activeClinicId = clinicId; }

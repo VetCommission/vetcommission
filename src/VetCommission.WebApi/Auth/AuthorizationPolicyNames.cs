@@ -9,6 +9,7 @@ public static class AuthorizationPolicyNames
     public const string ProfessionalsManage = ResourcePrefix + VetCommission.Application.Features.Auth.Access.AccessResources.ProfessionalsManage;
     public const string ProfessionalRolesManage = ResourcePrefix + VetCommission.Application.Features.Auth.Access.AccessResources.ProfessionalRolesManage;
     public const string ProfessionalSpecialtiesManage = ResourcePrefix + VetCommission.Application.Features.Auth.Access.AccessResources.ProfessionalSpecialtiesManage;
+    public const string ClinicsManage = ResourcePrefix + VetCommission.Application.Features.Auth.Access.AccessResources.ClinicsManage;
 
     public static string Resource(string resource)
     {

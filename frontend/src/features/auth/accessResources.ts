@@ -6,6 +6,7 @@ export const accessResources = {
   professionalsManage: "profissionais.gerenciar",
   professionalRolesManage: "funcoes-cargos.gerenciar",
   professionalSpecialtiesManage: "especialidades.gerenciar",
+  clinicsManage: "clinicas.gerenciar",
 } as const;
 
 export type AccessResource = (typeof accessResources)[keyof typeof accessResources];

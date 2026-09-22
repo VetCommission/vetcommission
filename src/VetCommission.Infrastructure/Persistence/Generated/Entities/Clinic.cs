@@ -3,15 +3,21 @@ using System.Collections.Generic;
 
 namespace VetCommission.Infrastructure.Persistence.Generated.Entities;
 
-public partial class Tenant
+public partial class Clinic
 {
     public Guid Id { get; set; }
 
+    public Guid TenantId { get; set; }
+
     public string Name { get; set; } = null!;
 
-    public string Slug { get; set; } = null!;
+    public string? LegalName { get; set; }
 
-    public string Timezone { get; set; } = null!;
+    public string? Document { get; set; }
+
+    public string? Email { get; set; }
+
+    public string? Phone { get; set; }
 
     public bool Active { get; set; }
 
@@ -19,9 +25,7 @@ public partial class Tenant
 
     public DateTime? UpdatedAtUtc { get; set; }
 
-    public virtual ICollection<AccessGroup> AccessGroups { get; set; } = new List<AccessGroup>();
-
-    public virtual ICollection<Clinic> Clinics { get; set; } = new List<Clinic>();
+    public DateTime? InactivatedAtUtc { get; set; }
 
     public virtual ICollection<ProfessionalRole> ProfessionalRoles { get; set; } = new List<ProfessionalRole>();
 
@@ -29,5 +33,5 @@ public partial class Tenant
 
     public virtual ICollection<Professional> Professionals { get; set; } = new List<Professional>();
 
-    public virtual ICollection<UserTenant> UserTenants { get; set; } = new List<UserTenant>();
+    public virtual Tenant Tenant { get; set; } = null!;
 }

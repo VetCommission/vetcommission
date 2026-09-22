@@ -8,4 +8,5 @@ export const endpoints = {
   professionalMasterData: "/api/dados-mestres/profissionais",
   professionalRoles: "/api/funcoes-cargos",
   professionalSpecialties: "/api/especialidades",
+  clinics: "/api/clinicas",
 } as const;

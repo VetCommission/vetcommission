@@ -18,6 +18,8 @@ public partial class VetCommissionDbContext : DbContext
 
     public virtual DbSet<AccessResource> AccessResources { get; set; }
 
+    public virtual DbSet<Clinic> Clinics { get; set; }
+
     public virtual DbSet<DatabaseVersion> DatabaseVersions { get; set; }
 
     public virtual DbSet<Professional> Professionals { get; set; }
@@ -126,6 +128,54 @@ public partial class VetCommissionDbContext : DbContext
             entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
         });
 
+        modelBuilder.Entity<Clinic>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_clinic");
+
+            entity.ToTable("clinic", "business");
+
+            entity.HasIndex(e => new { e.TenantId, e.Active }, "ix_clinic_tenant_active");
+
+            entity.HasIndex(e => new { e.TenantId, e.Name }, "ix_clinic_tenant_name");
+
+            entity.HasIndex(e => new { e.TenantId, e.Document }, "ux_clinic_tenant_document")
+                .IsUnique()
+                .HasFilter("(document IS NOT NULL)");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Active)
+                .HasDefaultValue(true)
+                .HasColumnName("active");
+            entity.Property(e => e.CreatedAtUtc)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at_utc");
+            entity.Property(e => e.Document)
+                .HasMaxLength(30)
+                .HasColumnName("document");
+            entity.Property(e => e.Email)
+                .HasMaxLength(254)
+                .HasColumnName("email");
+            entity.Property(e => e.InactivatedAtUtc).HasColumnName("inactivated_at_utc");
+            entity.Property(e => e.LegalName)
+                .HasMaxLength(200)
+                .HasColumnName("legal_name");
+            entity.Property(e => e.Name)
+                .HasMaxLength(160)
+                .HasColumnName("name");
+            entity.Property(e => e.Phone)
+                .HasMaxLength(40)
+                .HasColumnName("phone");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+
+            entity.HasOne(d => d.Tenant).WithMany(p => p.Clinics)
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_clinic_tenant");
+        });
+
         modelBuilder.Entity<DatabaseVersion>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("pk_database_version");
@@ -167,6 +217,8 @@ public partial class VetCommissionDbContext : DbContext
 
             entity.ToTable("professional", "business");
 
+            entity.HasIndex(e => new { e.TenantId, e.ClinicId, e.Active }, "ix_professional_tenant_clinic_active");
+
             entity.HasIndex(e => new { e.TenantId, e.Active }, "ix_professional_tenant_id_active");
 
             entity.HasIndex(e => new { e.TenantId, e.Name }, "ix_professional_tenant_id_name");
@@ -181,6 +233,7 @@ public partial class VetCommissionDbContext : DbContext
             entity.Property(e => e.Active)
                 .HasDefaultValue(true)
                 .HasColumnName("active");
+            entity.Property(e => e.ClinicId).HasColumnName("clinic_id");
             entity.Property(e => e.CreatedAtUtc)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("created_at_utc");
@@ -207,6 +260,11 @@ public partial class VetCommissionDbContext : DbContext
             entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
+            entity.HasOne(d => d.Clinic).WithMany(p => p.Professionals)
+                .HasForeignKey(d => d.ClinicId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_professional_clinic");
+
             entity.HasOne(d => d.Tenant).WithMany(p => p.Professionals)
                 .HasForeignKey(d => d.TenantId)
                 .OnDelete(DeleteBehavior.Restrict)
@@ -226,12 +284,15 @@ public partial class VetCommissionDbContext : DbContext
 
             entity.HasIndex(e => new { e.TenantId, e.Active }, "ix_professional_role_tenant_active");
 
+            entity.HasIndex(e => new { e.TenantId, e.ClinicId, e.Active }, "ix_professional_role_tenant_clinic_active");
+
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.Active)
                 .HasDefaultValue(true)
                 .HasColumnName("active");
+            entity.Property(e => e.ClinicId).HasColumnName("clinic_id");
             entity.Property(e => e.CreatedAtUtc)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("created_at_utc");
@@ -240,6 +301,11 @@ public partial class VetCommissionDbContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
             entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+
+            entity.HasOne(d => d.Clinic).WithMany(p => p.ProfessionalRoles)
+                .HasForeignKey(d => d.ClinicId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_professional_role_clinic");
 
             entity.HasOne(d => d.Tenant).WithMany(p => p.ProfessionalRoles)
                 .HasForeignKey(d => d.TenantId)
@@ -255,12 +321,15 @@ public partial class VetCommissionDbContext : DbContext
 
             entity.HasIndex(e => new { e.TenantId, e.Active }, "ix_professional_specialty_tenant_active");
 
+            entity.HasIndex(e => new { e.TenantId, e.ClinicId, e.Active }, "ix_professional_specialty_tenant_clinic_active");
+
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.Active)
                 .HasDefaultValue(true)
                 .HasColumnName("active");
+            entity.Property(e => e.ClinicId).HasColumnName("clinic_id");
             entity.Property(e => e.CreatedAtUtc)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("created_at_utc");
@@ -269,6 +338,11 @@ public partial class VetCommissionDbContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
             entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+
+            entity.HasOne(d => d.Clinic).WithMany(p => p.ProfessionalSpecialties)
+                .HasForeignKey(d => d.ClinicId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_professional_specialty_clinic");
 
             entity.HasOne(d => d.Tenant).WithMany(p => p.ProfessionalSpecialties)
                 .HasForeignKey(d => d.TenantId)
