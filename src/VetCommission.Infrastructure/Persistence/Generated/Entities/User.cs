@@ -25,5 +25,7 @@ public partial class User
 
     public DateTime? LastLoginAtUtc { get; set; }
 
+    public virtual ICollection<Professional> Professionals { get; set; } = new List<Professional>();
+
     public virtual ICollection<UserTenant> UserTenants { get; set; } = new List<UserTenant>();
 }

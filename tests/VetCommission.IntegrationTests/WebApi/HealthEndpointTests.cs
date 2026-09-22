@@ -1,6 +1,5 @@
 using System.Net;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace VetCommission.IntegrationTests.WebApi;
 
@@ -9,7 +8,7 @@ public sealed class HealthEndpointTests
 {
     private readonly HttpClient _client;
 
-    public HealthEndpointTests(WebApplicationFactory<Program> factory)
+    public HealthEndpointTests(WebApiTestFactory factory)
     {
         _client = factory.CreateClient();
     }

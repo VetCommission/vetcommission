@@ -13,7 +13,7 @@ export const theme = createTheme({
     error: { main: "#DC2626", light: "#FEECEC" },
     text: {
       primary: "#1F2937",
-      secondary: "#667280",
+      secondary: "#52606D",
     },
     divider: "#BFC7D0",
     background: {

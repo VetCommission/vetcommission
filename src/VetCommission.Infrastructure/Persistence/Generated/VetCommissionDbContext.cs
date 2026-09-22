@@ -20,6 +20,12 @@ public partial class VetCommissionDbContext : DbContext
 
     public virtual DbSet<DatabaseVersion> DatabaseVersions { get; set; }
 
+    public virtual DbSet<Professional> Professionals { get; set; }
+
+    public virtual DbSet<ProfessionalRole> ProfessionalRoles { get; set; }
+
+    public virtual DbSet<ProfessionalSpecialty> ProfessionalSpecialties { get; set; }
+
     public virtual DbSet<Tenant> Tenants { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -153,6 +159,121 @@ public partial class VetCommissionDbContext : DbContext
             entity.Property(e => e.Version)
                 .HasMaxLength(20)
                 .HasColumnName("version");
+        });
+
+        modelBuilder.Entity<Professional>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_professional");
+
+            entity.ToTable("professional", "business");
+
+            entity.HasIndex(e => new { e.TenantId, e.Active }, "ix_professional_tenant_id_active");
+
+            entity.HasIndex(e => new { e.TenantId, e.Name }, "ix_professional_tenant_id_name");
+
+            entity.HasIndex(e => new { e.TenantId, e.UserId }, "ux_professional_tenant_id_user_id")
+                .IsUnique()
+                .HasFilter("(user_id IS NOT NULL)");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Active)
+                .HasDefaultValue(true)
+                .HasColumnName("active");
+            entity.Property(e => e.CreatedAtUtc)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at_utc");
+            entity.Property(e => e.Email)
+                .HasMaxLength(254)
+                .HasColumnName("email");
+            entity.Property(e => e.InactivatedAtUtc).HasColumnName("inactivated_at_utc");
+            entity.Property(e => e.Name)
+                .HasMaxLength(160)
+                .HasColumnName("name");
+            entity.Property(e => e.Phone)
+                .HasMaxLength(40)
+                .HasColumnName("phone");
+            entity.Property(e => e.ProfessionalRegistration)
+                .HasMaxLength(80)
+                .HasColumnName("professional_registration");
+            entity.Property(e => e.Role)
+                .HasMaxLength(120)
+                .HasColumnName("role");
+            entity.Property(e => e.Specialty)
+                .HasMaxLength(120)
+                .HasColumnName("specialty");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Tenant).WithMany(p => p.Professionals)
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_professional_tenant");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Professionals)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_professional_user");
+        });
+
+        modelBuilder.Entity<ProfessionalRole>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_professional_role");
+
+            entity.ToTable("professional_role", "business");
+
+            entity.HasIndex(e => new { e.TenantId, e.Active }, "ix_professional_role_tenant_active");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Active)
+                .HasDefaultValue(true)
+                .HasColumnName("active");
+            entity.Property(e => e.CreatedAtUtc)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at_utc");
+            entity.Property(e => e.Name)
+                .HasMaxLength(120)
+                .HasColumnName("name");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+
+            entity.HasOne(d => d.Tenant).WithMany(p => p.ProfessionalRoles)
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_professional_role_tenant");
+        });
+
+        modelBuilder.Entity<ProfessionalSpecialty>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_professional_specialty");
+
+            entity.ToTable("professional_specialty", "business");
+
+            entity.HasIndex(e => new { e.TenantId, e.Active }, "ix_professional_specialty_tenant_active");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Active)
+                .HasDefaultValue(true)
+                .HasColumnName("active");
+            entity.Property(e => e.CreatedAtUtc)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at_utc");
+            entity.Property(e => e.Name)
+                .HasMaxLength(120)
+                .HasColumnName("name");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+
+            entity.HasOne(d => d.Tenant).WithMany(p => p.ProfessionalSpecialties)
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_professional_specialty_tenant");
         });
 
         modelBuilder.Entity<Tenant>(entity =>

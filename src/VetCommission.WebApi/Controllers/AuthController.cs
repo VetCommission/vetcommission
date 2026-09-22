@@ -20,7 +20,7 @@ public sealed class AuthController(IMediator mediator) : ControllerBase
         return result.ToActionResult(this);
     }
 
-    [Authorize(Policy = AuthorizationPolicyNames.AppAccess)]
+    [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> Me(CancellationToken cancellationToken)
     {

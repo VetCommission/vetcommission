@@ -23,6 +23,19 @@ $apiUrl = 'http://localhost:5077'
 $frontendUrl = 'http://localhost:3000'
 $logsPath = Join-Path $repoRoot '.tmp\post-implementation-checks'
 $startedProcesses = New-Object System.Collections.Generic.List[System.Diagnostics.Process]
+$stopAllScriptPath = Join-Path $PSScriptRoot '00-Stop-All.ps1'
+
+if (-not $KeepBlockingProcesses) {
+    if (-not (Test-Path -LiteralPath $stopAllScriptPath -PathType Leaf)) {
+        throw "Script de parada nao encontrado: $stopAllScriptPath"
+    }
+
+    Write-Host '==> Encerrando servicos antes da validacao'
+    & $stopAllScriptPath
+    if (-not $?) {
+        throw 'Stop-All falhou ao encerrar os servicos.'
+    }
+}
 
 function Write-Section {
     param([Parameter(Mandatory)][string]$Message)

@@ -94,4 +94,25 @@ public sealed class AuthRepository(VetCommissionDbContext dbContext) : IAuthRepo
                     userTenant.AccessGroup.Active,
                 cancellationToken);
     }
+
+    public Task<bool> UserHasAccessAsync(
+        Guid userId,
+        Guid tenantId,
+        string resource,
+        CancellationToken cancellationToken)
+    {
+        return dbContext.UserTenants
+            .AsNoTracking()
+            .AnyAsync(userTenant =>
+                    userTenant.UserId == userId &&
+                    userTenant.TenantId == tenantId &&
+                    userTenant.Active &&
+                    userTenant.User.Active &&
+                    userTenant.Tenant.Active &&
+                    userTenant.AccessGroup.Active &&
+                    userTenant.AccessGroup.AccessGroupResources.Any(access =>
+                        access.AccessResource.Active &&
+                        access.AccessResource.ResourceKey == resource),
+                cancellationToken);
+    }
 }

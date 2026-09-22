@@ -4,4 +4,8 @@ export const endpoints = {
     login: "/api/auth/login",
     me: "/api/auth/me",
   },
+  professionals: "/api/profissionais",
+  professionalMasterData: "/api/dados-mestres/profissionais",
+  professionalRoles: "/api/funcoes-cargos",
+  professionalSpecialties: "/api/especialidades",
 } as const;

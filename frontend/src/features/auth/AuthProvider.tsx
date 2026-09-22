@@ -11,13 +11,9 @@ import {
 } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clearApiSession, setApiAccessToken } from "@/lib/api/apiClient";
-import type { AuthSession, CurrentSession, LoginRequest } from "@/types/api";
+import type { AuthSession, CurrentSession, LoginRequest } from "./authTypes";
 import { getCurrentSession, login as loginRequest } from "./authApi";
-import {
-  clearStoredAccessToken,
-  readStoredAccessToken,
-  storeAccessToken,
-} from "./authStorage";
+import { clearStoredAccessToken, readStoredAccessToken, storeAccessToken } from "./authStorage";
 
 type AuthContextValue = {
   session: CurrentSession | null;
@@ -32,7 +28,16 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const queryClient = useQueryClient();
-  const [accessToken, setAccessToken] = useState<string | null>(() => readStoredAccessToken());
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [storageReady, setStorageReady] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setAccessToken(readStoredAccessToken());
+      setStorageReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (accessToken) {
@@ -43,23 +48,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const currentSessionQuery = useQuery({
     queryKey: ["auth", "me"],
     queryFn: getCurrentSession,
-    enabled: Boolean(accessToken),
+    enabled: storageReady && Boolean(accessToken),
     retry: false,
   });
 
   const clearSession = useCallback(() => {
+    queryClient.cancelQueries();
+    queryClient.clear();
     setAccessToken(null);
     clearStoredAccessToken();
     clearApiSession();
-    queryClient.removeQueries({ queryKey: ["auth"] });
   }, [queryClient]);
 
   useEffect(() => {
     if (currentSessionQuery.isError) {
       clearStoredAccessToken();
       clearApiSession();
+      queryClient.clear();
     }
-  }, [currentSessionQuery.isError]);
+  }, [currentSessionQuery.isError, queryClient]);
 
   const loginMutation = useMutation({
     mutationFn: loginRequest,
@@ -83,8 +90,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
     () => ({
       session: currentSessionQuery.data ?? null,
       accessToken,
-      isAuthenticated: Boolean(accessToken && currentSessionQuery.data),
-      isLoading: currentSessionQuery.isLoading || loginMutation.isPending,
+      isAuthenticated: Boolean(
+        accessToken && currentSessionQuery.data && !currentSessionQuery.isError,
+      ),
+      isLoading: !storageReady || currentSessionQuery.isLoading || loginMutation.isPending,
       login,
       logout: clearSession,
     }),
@@ -93,8 +102,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
       clearSession,
       currentSessionQuery.data,
       currentSessionQuery.isLoading,
+      currentSessionQuery.isError,
       login,
       loginMutation.isPending,
+      storageReady,
     ],
   );
 
