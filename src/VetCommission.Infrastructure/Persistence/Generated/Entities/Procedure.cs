@@ -33,5 +33,7 @@ public partial class Procedure
 
     public virtual Clinic Clinic { get; set; } = null!;
 
+    public virtual ICollection<CommissionRule> CommissionRules { get; set; } = new List<CommissionRule>();
+
     public virtual Tenant Tenant { get; set; } = null!;
 }

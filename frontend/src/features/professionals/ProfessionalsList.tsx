@@ -35,6 +35,7 @@ import { useTenant } from "@/features/auth/TenantProvider";
 import { ApiError } from "@/lib/api/apiError";
 import { listProfessionals, setProfessionalActive } from "./professionalsApi";
 import { professionalQueryKeys } from "./professionalQueryKeys";
+import { CrudActions } from "@/components/tables/CrudActions";
 
 const pageSize = 20;
 
@@ -185,7 +186,7 @@ export function ProfessionalsList() {
       {data && data.items.length > 0 ? (
         <>
           <Paper variant="outlined" sx={{ overflowX: "auto" }}>
-            <Table aria-label="Lista de profissionais" sx={{ minWidth: 760 }}>
+            <Table aria-label="Lista de profissionais" sx={{ width: "100%", minWidth: 760 }}>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ width: 72 }} />
@@ -220,7 +221,7 @@ export function ProfessionalsList() {
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <Button component={Link} href={`/app/profissionais/${professional.id}`}>
+                      <CrudActions><Button component={Link} href={`/app/profissionais/${professional.id}`}>
                         Visualizar
                       </Button>
                       <Button
@@ -234,7 +235,7 @@ export function ProfessionalsList() {
                         }
                       >
                         {professional.active ? "Inativar" : "Ativar"}
-                      </Button>
+                      </Button></CrudActions>
                     </TableCell>
                   </TableRow>
                 ))}

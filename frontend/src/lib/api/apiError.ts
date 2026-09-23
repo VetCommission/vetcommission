@@ -36,7 +36,7 @@ export function getApiErrorMessage(error: unknown, fallback: string) {
   if (!(error instanceof ApiError)) return fallback;
   if (error.status === 401) return "Sua sessão expirou. Entre novamente para continuar.";
   if (error.status === 403) return "Você não possui permissão para realizar esta ação.";
-  if (error.status === 409) return "Já existe um cadastro com esses dados.";
+  if (error.status === 409) return error.errors.find((item) => !item.field)?.message ?? "Já existe um cadastro com esses dados.";
   if (error.status === 422 || error.errors.some((item) => item.code === "Validation")) {
     return error.errors.find((item) => !item.field)?.message ?? "Revise os dados informados.";
   }

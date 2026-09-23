@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Button, CircularProgress, Container, Stack } from "@mui/material";
+import { Alert, Button, CircularProgress, Stack } from "@mui/material";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { RequireAcesso } from "@/features/auth/RequireAcesso";
@@ -10,6 +10,7 @@ import { ApiError } from "@/lib/api/apiError";
 import { getProfessional } from "./professionalsApi";
 import { professionalQueryKeys } from "./professionalQueryKeys";
 import { ProfessionalForm } from "./ProfessionalForm";
+import { CrudPageContainer } from "@/components/layout/CrudPageContainer";
 
 type ProfessionalDetailsClientProps = {
   id: string;
@@ -31,7 +32,7 @@ export function ProfessionalDetailsClient({ id }: ProfessionalDetailsClientProps
 
   return (
     <RequireAcesso recurso={accessResources.professionalsManage}>
-      <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>
+      <CrudPageContainer>
         {query.isLoading ? <CircularProgress aria-label="Carregando profissional" /> : null}
         {query.isError ? (
           <Stack spacing={2}>
@@ -52,7 +53,7 @@ export function ProfessionalDetailsClient({ id }: ProfessionalDetailsClientProps
           </Stack>
         ) : null}
         {query.data ? <ProfessionalForm initialMode="view" professional={query.data} /> : null}
-      </Container>
+      </CrudPageContainer>
     </RequireAcesso>
   );
 }

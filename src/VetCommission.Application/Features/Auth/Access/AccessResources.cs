@@ -12,6 +12,8 @@ public static class AccessResources
     public const string ClinicsManage = "clinicas.gerenciar";
     public const string ProcedureCategoriesManage = "categorias-procedimentos.gerenciar";
     public const string ProceduresManage = "procedimentos.gerenciar";
+    public const string CompetenciesManage = "competencias.gerenciar";
+    public const string CommissionRulesManage = "regras-comissao.gerenciar";
 
     public static readonly IReadOnlyCollection<string> All =
     [
@@ -25,5 +27,7 @@ public static class AccessResources
         ,ClinicsManage
         ,ProcedureCategoriesManage
         ,ProceduresManage
+        ,CompetenciesManage
+        ,CommissionRulesManage
     ];
 }
