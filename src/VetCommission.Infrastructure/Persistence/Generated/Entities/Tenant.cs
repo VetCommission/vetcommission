@@ -23,6 +23,10 @@ public partial class Tenant
 
     public virtual ICollection<Clinic> Clinics { get; set; } = new List<Clinic>();
 
+    public virtual ICollection<CommissionRule> CommissionRules { get; set; } = new List<CommissionRule>();
+
+    public virtual ICollection<Competency> Competencies { get; set; } = new List<Competency>();
+
     public virtual ICollection<ProcedureCategory> ProcedureCategories { get; set; } = new List<ProcedureCategory>();
 
     public virtual ICollection<Procedure> Procedures { get; set; } = new List<Procedure>();

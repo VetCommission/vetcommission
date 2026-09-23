@@ -9,6 +9,7 @@ export const accessResources = {
   clinicsManage: "clinicas.gerenciar",
   procedureCategoriesManage: "categorias-procedimentos.gerenciar",
   proceduresManage: "procedimentos.gerenciar",
+  competenciesManage: "competencias.gerenciar",
 } as const;
 
 export type AccessResource = (typeof accessResources)[keyof typeof accessResources];

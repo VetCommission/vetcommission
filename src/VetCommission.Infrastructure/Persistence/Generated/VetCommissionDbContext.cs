@@ -20,6 +20,10 @@ public partial class VetCommissionDbContext : DbContext
 
     public virtual DbSet<Clinic> Clinics { get; set; }
 
+    public virtual DbSet<CommissionRule> CommissionRules { get; set; }
+
+    public virtual DbSet<Competency> Competencies { get; set; }
+
     public virtual DbSet<DatabaseVersion> DatabaseVersions { get; set; }
 
     public virtual DbSet<Procedure> Procedures { get; set; }
@@ -178,6 +182,98 @@ public partial class VetCommissionDbContext : DbContext
                 .HasForeignKey(d => d.TenantId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_clinic_tenant");
+        });
+
+        modelBuilder.Entity<CommissionRule>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_commission_rule");
+
+            entity.ToTable("commission_rule", "business");
+
+            entity.HasIndex(e => new { e.TenantId, e.ClinicId, e.ProcedureId, e.Active }, "ix_commission_rule_tenant_clinic_procedure");
+
+            entity.HasIndex(e => new { e.TenantId, e.ClinicId, e.CompetencyId, e.ProcedureId }, "ux_commission_rule_competency_procedure").IsUnique();
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Active)
+                .HasDefaultValue(true)
+                .HasColumnName("active");
+            entity.Property(e => e.ClinicId).HasColumnName("clinic_id");
+            entity.Property(e => e.CompetencyId).HasColumnName("competency_id");
+            entity.Property(e => e.CreatedAtUtc)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at_utc");
+            entity.Property(e => e.FixedValue)
+                .HasPrecision(18, 2)
+                .HasColumnName("fixed_value");
+            entity.Property(e => e.Percentage)
+                .HasPrecision(7, 4)
+                .HasColumnName("percentage");
+            entity.Property(e => e.ProcedureId).HasColumnName("procedure_id");
+            entity.Property(e => e.RuleType)
+                .HasMaxLength(20)
+                .HasColumnName("rule_type");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.UpdatedAtUtc).HasColumnName("updated_at_utc");
+
+            entity.HasOne(d => d.Clinic).WithMany(p => p.CommissionRules)
+                .HasForeignKey(d => d.ClinicId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_commission_rule_clinic");
+
+            entity.HasOne(d => d.Competency).WithMany(p => p.CommissionRules)
+                .HasForeignKey(d => d.CompetencyId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_commission_rule_competency");
+
+            entity.HasOne(d => d.Procedure).WithMany(p => p.CommissionRules)
+                .HasForeignKey(d => d.ProcedureId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_commission_rule_procedure");
+
+            entity.HasOne(d => d.Tenant).WithMany(p => p.CommissionRules)
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_commission_rule_tenant");
+        });
+
+        modelBuilder.Entity<Competency>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_competency");
+
+            entity.ToTable("competency", "business");
+
+            entity.HasIndex(e => new { e.TenantId, e.ClinicId, e.Status }, "ix_competency_tenant_clinic_status");
+
+            entity.HasIndex(e => new { e.TenantId, e.ClinicId, e.Year, e.Month }, "ux_competency_tenant_clinic_year_month").IsUnique();
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.ClinicId).HasColumnName("clinic_id");
+            entity.Property(e => e.ClosedAtUtc).HasColumnName("closed_at_utc");
+            entity.Property(e => e.Month).HasColumnName("month");
+            entity.Property(e => e.OpenedAtUtc)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("opened_at_utc");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("'open'::character varying")
+                .HasColumnName("status");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.Year).HasColumnName("year");
+
+            entity.HasOne(d => d.Clinic).WithMany(p => p.Competencies)
+                .HasForeignKey(d => d.ClinicId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_competency_clinic");
+
+            entity.HasOne(d => d.Tenant).WithMany(p => p.Competencies)
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_competency_tenant");
         });
 
         modelBuilder.Entity<DatabaseVersion>(entity =>

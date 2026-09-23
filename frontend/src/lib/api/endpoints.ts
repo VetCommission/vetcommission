@@ -11,4 +11,5 @@ export const endpoints = {
   clinics: "/api/clinicas",
   procedureCategories: "/api/categorias-procedimentos",
   procedures: "/api/procedimentos",
+  competencies: "/api/competencias",
 } as const;

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Button,
+  Chip,
   Paper,
   Stack,
   Table,
@@ -18,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { listProfessionalSpecialties, setProfessionalSpecialtyActive } from "./professionalSpecialtiesApi";
 import { useTenant } from "@/features/auth/TenantProvider";
+import { CrudActions } from "@/components/tables/CrudActions";
 
 export function ProfessionalSpecialtiesList() {
   const { activeTenantId } = useTenant();
@@ -44,7 +46,7 @@ export function ProfessionalSpecialtiesList() {
         <Alert severity="error">Não foi possível carregar especialidades.</Alert>
       ) : null}
       <Paper variant="outlined" sx={{ width: "100%", overflowX: "auto" }}>
-        <Table aria-label="Lista de especialidades">
+        <Table aria-label="Lista de especialidades" sx={{ width: "100%", minWidth: 760 }}>
           <TableHead>
             <TableRow>
               <TableCell>Nome</TableCell>
@@ -56,8 +58,8 @@ export function ProfessionalSpecialtiesList() {
             {query.data?.items.map((item) => (
               <TableRow key={item.id} hover onDoubleClick={() => router.push(`/app/especialidades/${item.id}`)} sx={{ cursor: "pointer" }}>
                 <TableCell>{item.name}</TableCell>
-                <TableCell>{item.active ? "Ativo" : "Inativo"}</TableCell>
-                <TableCell align="right"><Button component={Link} href={`/app/especialidades/${item.id}`}>Visualizar</Button><Button disabled={statusMutation.isPending} onClick={() => statusMutation.mutate({ id: item.id, active: !item.active })}>{item.active ? "Inativar" : "Ativar"}</Button></TableCell>
+                <TableCell><Chip size="small" color={item.active ? "success" : "default"} label={item.active ? "Ativo" : "Inativo"} /></TableCell>
+                <TableCell align="right"><CrudActions><Button component={Link} href={`/app/especialidades/${item.id}`}>Visualizar</Button><Button disabled={statusMutation.isPending} onClick={() => statusMutation.mutate({ id: item.id, active: !item.active })}>{item.active ? "Inativar" : "Ativar"}</Button></CrudActions></TableCell>
               </TableRow>
             ))}
           </TableBody>

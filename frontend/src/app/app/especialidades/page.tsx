@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { CrudPageContainer } from "@/components/layout/CrudPageContainer";
 import { RequireAcesso } from "@/features/auth/RequireAcesso";
 import { accessResources } from "@/features/auth/accessResources";
 import { ProfessionalSpecialtiesList } from "@/features/professional-specialties/ProfessionalSpecialtiesList";
@@ -7,9 +7,9 @@ export default function ProfessionalSpecialtiesPage() {
   return (
     <RequireAcesso recurso={accessResources.professionalSpecialtiesManage}>
       <AuthenticatedNavbar />
-      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
+      <CrudPageContainer>
         <ProfessionalSpecialtiesList />
-      </Container>
+      </CrudPageContainer>
     </RequireAcesso>
   );
 }

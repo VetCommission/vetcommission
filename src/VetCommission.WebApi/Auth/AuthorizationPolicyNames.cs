@@ -12,6 +12,8 @@ public static class AuthorizationPolicyNames
     public const string ClinicsManage = ResourcePrefix + VetCommission.Application.Features.Auth.Access.AccessResources.ClinicsManage;
     public const string ProcedureCategoriesManage = ResourcePrefix + VetCommission.Application.Features.Auth.Access.AccessResources.ProcedureCategoriesManage;
     public const string ProceduresManage = ResourcePrefix + VetCommission.Application.Features.Auth.Access.AccessResources.ProceduresManage;
+    public const string CompetenciesManage = ResourcePrefix + VetCommission.Application.Features.Auth.Access.AccessResources.CompetenciesManage;
+    public const string CommissionRulesManage = ResourcePrefix + VetCommission.Application.Features.Auth.Access.AccessResources.CommissionRulesManage;
 
     public static string Resource(string resource)
     {
