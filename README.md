@@ -27,6 +27,16 @@ O repositório contém os contratos de arquitetura, requisitos de produto/UI/UX,
 
 Consulte [scriptsPS/README.md](scriptsPS/README.md) para os comandos disponíveis.
 
+Para preparar a maquina local (configuracao, dependencias, Docker e migrations) e iniciar:
+
+```powershell
+.\scriptsPS\Prepare-Environment.ps1
+.\scriptsPS\Start-All.ps1
+```
+
+O script preserva um `.env` existente e pede confirmacao antes de aplicar SQL.
+Use `-Force` na preparacao para automacao local autorizada.
+
 ## Acesso local ao sistema
 
 Com PostgreSQL, API e frontend em execucao, abra:

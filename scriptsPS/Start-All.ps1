@@ -3,7 +3,9 @@ param()
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$containerName = 'vetcommission-postgres'
+. (Join-Path $PSScriptRoot 'LocalEnvironment.ps1')
+$environment = Get-LocalEnvironmentValues -Path (Join-Path $repoRoot '.env')
+$containerName = if ($environment['POSTGRES_CONTAINER_NAME']) { $environment['POSTGRES_CONTAINER_NAME'] } else { 'vetcommission-postgres' }
 
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     throw 'Docker não encontrado no PATH.'
@@ -38,10 +40,7 @@ foreach ($file in $requiredFiles) {
 
 Push-Location $repoRoot
 try {
-    docker compose up -d postgres
-    if ($LASTEXITCODE -ne 0) {
-        throw 'Não foi possível iniciar o PostgreSQL pelo Docker Compose.'
-    }
+    Start-LocalPostgresContainer -Values $environment -EnvironmentFile (Join-Path $repoRoot '.env')
 
     $databaseHealthy = $false
     for ($attempt = 1; $attempt -le 12; $attempt++) {
