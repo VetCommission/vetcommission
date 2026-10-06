@@ -7,7 +7,8 @@ param(
     [switch]$SkipGitChecks,
     [switch]$KeepRuntimeProcesses,
     [switch]$KeepBlockingProcesses,
-    [switch]$RefreshFrontendDependencies
+    [switch]$RefreshFrontendDependencies,
+    [switch]$Force
 )
 
 $ErrorActionPreference = 'Stop'
@@ -367,10 +368,17 @@ try {
     Assert-File $workerProjectPath
     Assert-Directory $frontendPath
 
+    Write-Section 'Preparando ambiente local'
+    & (Join-Path $PSScriptRoot 'Prepare-Environment.ps1') `
+        -SkipDotNet:$SkipDotNet -SkipFrontend:$SkipFrontend `
+        -SkipDocker:($SkipDocker -or $SkipRuntime) `
+        -RefreshFrontendDependencies:$RefreshFrontendDependencies `
+        -KeepBlockingProcesses:$KeepBlockingProcesses -Force:$Force
+    if (-not $?) { throw 'Preparacao do ambiente falhou.' }
+
     if (-not $SkipDotNet) {
         Write-Section 'Validando backend .NET'
         Assert-Command 'dotnet'
-        Invoke-NativeCommand 'dotnet' @('restore', $solutionPath)
         Invoke-NativeCommand 'dotnet' @('build', $solutionPath, '--no-restore')
         Invoke-NativeCommand 'dotnet' @('test', $solutionPath, '--no-build')
     }
@@ -379,43 +387,11 @@ try {
         Write-Section 'Validando frontend'
         Use-RequiredNodeVersion
 
-        if ($RefreshFrontendDependencies -or -not (Test-FrontendDependenciesReady)) {
-            Stop-ProcessesUsingTcpPort 3000 'npm ci do frontend'
-            Invoke-NativeCommand 'npm.cmd' @('ci') $frontendPath
-        }
-        else {
-            Write-Host 'Dependencias do frontend ja parecem instaladas. Pulando npm ci. Use -RefreshFrontendDependencies para reinstalar.'
-        }
-
         Invoke-NativeCommand 'npm.cmd' @('run', 'lint') $frontendPath
         Invoke-NativeCommand 'npm.cmd' @('run', 'build') $frontendPath
     }
 
-    if (-not $SkipDocker -and -not $SkipRuntime) {
-        Write-Section 'Validando PostgreSQL local'
-        Assert-DockerDaemon
-
-        Invoke-NativeCommand 'docker' @('compose', 'up', '-d', 'postgres')
-
-        $databaseHealthy = $false
-        for ($attempt = 1; $attempt -le 12; $attempt++) {
-            $health = docker inspect --format '{{.State.Health.Status}}' $postgresContainerName 2>$null
-            if ($LASTEXITCODE -eq 0 -and $health -eq 'healthy') {
-                $databaseHealthy = $true
-                break
-            }
-
-            Start-Sleep -Seconds 5
-        }
-
-        if (-not $databaseHealthy) {
-            throw "PostgreSQL nao ficou saudavel no tempo esperado. Verifique: docker logs $postgresContainerName"
-        }
-
-        Write-Host 'PostgreSQL saudavel.'
-    }
-
-    if (-not $SkipRuntime) {
+    if (-not $SkipRuntime -and -not $SkipDotNet) {
         Write-Section 'Validando runtime da API'
         Assert-Command 'dotnet'
         Stop-ProcessesUsingTcpPort 5077 'runtime da API'
@@ -425,7 +401,9 @@ try {
         Write-Section 'Validando runtime do Worker'
         Start-CheckedProcess 'dotnet' @('run', '--project', $workerProjectPath) $repoRoot 'Worker'
         Start-Sleep -Seconds 5
+    }
 
+    if (-not $SkipRuntime -and -not $SkipFrontend) {
         Write-Section 'Validando runtime do frontend'
         Use-RequiredNodeVersion
         Stop-ProcessesUsingTcpPort 3000 'runtime do frontend'

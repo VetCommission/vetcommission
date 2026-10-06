@@ -13,6 +13,9 @@ if (-not (Test-Path -LiteralPath $projectPath -PathType Leaf)) {
     throw "Projeto do Worker não encontrado: $projectPath"
 }
 
+. (Join-Path $PSScriptRoot 'LocalEnvironment.ps1')
+Set-LocalDatabaseConnection -Values (Get-LocalEnvironmentValues -Path (Join-Path $repoRoot '.env'))
+
 Push-Location $repoRoot
 try {
     dotnet run --project $projectPath

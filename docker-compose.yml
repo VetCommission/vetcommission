@@ -3,7 +3,7 @@ name: vetcommission
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: vetcommission-postgres
+    container_name: ${POSTGRES_CONTAINER_NAME:-vetcommission-postgres}
     restart: unless-stopped
 
     environment:
@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
 
     volumes:
       - vetcommission-postgres-data:/var/lib/postgresql/data

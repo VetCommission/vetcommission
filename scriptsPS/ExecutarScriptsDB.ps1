@@ -1,12 +1,14 @@
 [CmdletBinding()]
 param(
     [string]$EnvironmentFile,
-    [string]$ContainerName
+    [string]$ContainerName,
+    [switch]$Force
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
-$ScriptVersion = "3.0"
+$ScriptVersion = "3.1"
+. (Join-Path $PSScriptRoot 'LocalEnvironment.ps1')
 
 function Assert-NativeCommandSucceeded {
     param([Parameter(Mandatory)][string]$Operation)
@@ -25,49 +27,7 @@ function ConvertTo-SqlLiteral {
 function Get-DotEnvValues {
     param([Parameter(Mandatory)][string]$Path)
 
-    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
-        throw "Arquivo de ambiente nao encontrado: $Path"
-    }
-
-    $values = @{}
-
-    foreach ($line in Get-Content -LiteralPath $Path) {
-        $content = $line.Trim()
-
-        if ([string]::IsNullOrWhiteSpace($content) -or $content.StartsWith("#")) {
-            continue
-        }
-
-        if ($content.StartsWith("export ")) {
-            $content = $content.Substring(7).Trim()
-        }
-
-        $parts = $content -split "=", 2
-
-        if ($parts.Count -ne 2) {
-            throw "Linha invalida no arquivo de ambiente: $line"
-        }
-
-        $key = $parts[0].Trim()
-        $value = $parts[1].Trim()
-
-        if ([string]::IsNullOrWhiteSpace($key)) {
-            throw "Variavel sem nome encontrada no arquivo de ambiente."
-        }
-
-        if ($value.Length -ge 2) {
-            $hasDoubleQuotes = $value.StartsWith('"') -and $value.EndsWith('"')
-            $hasSingleQuotes = $value.StartsWith("'") -and $value.EndsWith("'")
-
-            if ($hasDoubleQuotes -or $hasSingleQuotes) {
-                $value = $value.Substring(1, $value.Length - 2)
-            }
-        }
-
-        $values[$key] = $value
-    }
-
-    return $values
+    return Get-LocalEnvironmentValues -Path $Path
 }
 
 function Get-RequiredEnvironmentValue {
@@ -153,7 +113,7 @@ $scripts = @(
 
 if ($scripts.Count -eq 0) {
     Write-Host "Nenhum script SQL foi encontrado em '$scriptsDirectory'." -ForegroundColor Yellow
-    exit 0
+    return
 }
 
 $expectedNumber = 1
@@ -179,12 +139,12 @@ Write-Host "Container: $ContainerName" -ForegroundColor DarkGray
 Write-Host "Banco    : $DatabaseName" -ForegroundColor DarkGray
 
 Write-Warning "Os scripts pendentes alterarao o banco '$DatabaseName' no container '$ContainerName'."
-$expectedConfirmation = "ATUALIZAR $DatabaseName"
-$confirmation = Read-Host "Para continuar, digite exatamente: $expectedConfirmation"
-
-if ($confirmation -cne $expectedConfirmation) {
-    Write-Host "Execucao cancelada. Nenhuma alteracao foi feita no banco." -ForegroundColor Yellow
-    exit 0
+if (-not $Force) {
+    $expectedConfirmation = "ATUALIZAR $DatabaseName"
+    $confirmation = Read-Host "Para continuar, digite exatamente: $expectedConfirmation"
+    if ($confirmation -cne $expectedConfirmation) {
+        throw 'Execucao cancelada. Nenhuma alteracao foi feita no banco.'
+    }
 }
 
 foreach ($script in $scripts) {

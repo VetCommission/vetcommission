@@ -8,6 +8,59 @@ Execute os scripts a partir da raiz do repositório. Pré-requisitos:
 - Docker Desktop;
 - arquivo `.env` local baseado em `.env.example`.
 
+## Preparar o ambiente local
+
+Antes da primeira execucao, a partir da raiz do repositorio:
+
+```powershell
+.\scriptsPS\Prepare-Environment.ps1
+```
+
+O script cria `.env` a partir de `.env.example` com uma senha aleatoria quando o
+arquivo nao existe. Um `.env` existente e preservado e validado. A conexao do banco
+e carregada no processo atual sem exibir senha.
+
+A preparacao valida o SDK selecionado por `global.json`, restaura a solucao e as
+ferramentas .NET locais, ativa a versao Node de `.node-version` quando houver
+nvm/fnm/volta, sincroniza o lockfile com `npm install --package-lock-only` e instala
+dependencias com `npm ci` quando necessario. Alteracoes no lockfile ficam no Git
+para revisao; erros de instalacao interrompem a preparacao.
+
+Tambem tenta iniciar o Docker Desktop se estiver instalado e parado, inicia o
+PostgreSQL pelo Compose, aguarda seu health check e aplica scripts SQL pendentes.
+As ferramentas que nao estiverem instaladas precisam ser instaladas conforme a
+mensagem apresentada. O script nao apaga volumes nem recria bancos existentes.
+Se existir um volume PostgreSQL sem `.env`, recupere as credenciais originais
+antes de preparar Docker; gerar outra senha nao altera a senha de um banco existente.
+
+O executor solicita `ATUALIZAR vetcommission` antes de aplicar migrations.
+Para uma execucao local automatizada ja autorizada:
+
+```powershell
+.\scriptsPS\Prepare-Environment.ps1 -Force
+```
+
+Opcoes para preparar somente parte do ambiente:
+
+```powershell
+.\scriptsPS\Prepare-Environment.ps1 -SkipDocker
+.\scriptsPS\Prepare-Environment.ps1 -SkipDotNet -SkipFrontend
+.\scriptsPS\Prepare-Environment.ps1 -SkipMigrations
+.\scriptsPS\Prepare-Environment.ps1 -RefreshFrontendDependencies
+```
+
+`-SkipDocker` tambem pula migrations. `-SkipMigrations` sobe o PostgreSQL sem
+aplicar SQL. `-KeepBlockingProcesses` impede encerrar um frontend na porta 3000
+quando uma reinstalacao for necessaria. `.env` aceita `POSTGRES_HOST`,
+`POSTGRES_PORT` e `POSTGRES_CONTAINER_NAME`; host padrao e `localhost`, porta
+padrao e `5432`. Para um PostgreSQL externo, use `-SkipDocker`.
+
+Depois da preparacao:
+
+```powershell
+.\scriptsPS\Start-All.ps1
+```
+
 ## Iniciar os componentes
 
 Para parar API, frontend e Worker:
@@ -74,6 +127,7 @@ Se a versao ativa do Node for diferente e `nvm`, `fnm` ou `volta` estiver instal
 
 O script executa o processo padrao de pos-implementacao:
 
+- prepara automaticamente o ambiente com `Prepare-Environment.ps1`, respeitando as opcoes de pular etapas;
 - encerra API, frontend e Worker antes de compilar para liberar portas e DLLs bloqueadas;
 - `dotnet restore`, `dotnet build` e `dotnet test`;
 - `npm ci` somente quando `node_modules` nao existir, estiver incompleto ou quando `-RefreshFrontendDependencies` for informado;
@@ -83,6 +137,17 @@ O script executa o processo padrao de pos-implementacao:
 - start tecnico do Worker;
 - start tecnico do frontend em `http://localhost:3000`;
 - `git diff --check` e `git status --short`.
+
+Com runtime habilitado, a preparacao tambem aplica migrations e carrega a conexao
+da API e do Worker a partir do `.env`. A confirmacao do banco continua obrigatoria
+por padrao. Para automacao local autorizada, use:
+
+```powershell
+.\scriptsPS\Invoke-PostImplementationChecks.ps1 -Force
+```
+
+`-SkipRuntime` pula Docker e migrations na preparacao. `-SkipDocker` pula Docker
+e migrations, mas ainda tenta validar runtimes usando o banco informado no `.env`.
 
 Use parametros para rodar partes do processo quando necessario:
 
