@@ -14,4 +14,4 @@ else
 fi
 
 echo 'Pre-commit: executando checks de pos-implementacao...'
-exec "$powershell_command" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$repo_root/scriptsPS/Invoke-PostImplementationChecks.ps1" -Force
+exec "$powershell_command" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$repo_root/scriptsPS/Build-Frontend.ps1" -Force
