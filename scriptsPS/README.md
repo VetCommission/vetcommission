@@ -121,6 +121,23 @@ Se a versao ativa do Node for diferente e `nvm`, `fnm` ou `volta` estiver instal
 
 ## Validar uma implementacao antes do commit/PR
 
+### Hook de pre-commit
+
+Para ativar a validacao automatica neste clone, execute na raiz do repositorio:
+
+```powershell
+git config --local core.hooksPath .githooks
+```
+
+Antes de cada commit, o hook executa `Invoke-PostImplementationChecks.ps1 -Force`
+com PowerShell 7 (`pwsh` no PATH). Se o check falhar ou o PowerShell estiver
+indisponivel, o commit e bloqueado. A ativacao e local: repita o comando em novos
+clones. O arquivo do hook e versionado em `.githooks/pre-commit`.
+
+A validacao completa encerra os servicos locais, prepara o ambiente e pode aplicar
+migrations sem confirmacao interativa por causa de `-Force`. Os processos iniciados
+para validar runtime sao encerrados ao final. Todos os checks permanecem habilitados.
+
 ```powershell
 .\scriptsPS\Invoke-PostImplementationChecks.ps1
 ```

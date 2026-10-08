@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+if command -v pwsh.exe >/dev/null 2>&1; then
+    powershell_command=pwsh.exe
+elif command -v pwsh >/dev/null 2>&1; then
+    powershell_command=pwsh
+else
+    echo 'Pre-commit: PowerShell 7 (pwsh) precisa estar instalado e disponivel no PATH.' >&2
+    exit 1
+fi
+
+echo 'Pre-commit: executando checks de pos-implementacao...'
+exec "$powershell_command" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$repo_root/scriptsPS/Invoke-PostImplementationChecks.ps1" -Force
