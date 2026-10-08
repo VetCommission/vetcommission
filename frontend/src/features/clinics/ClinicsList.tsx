@@ -105,6 +105,7 @@ export function ClinicsList() {
             ))}
           </TableBody>
         </Table>
+        {/* <Table></Table> */}
       </Paper>
     </Stack>
   );
