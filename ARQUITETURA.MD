@@ -17,8 +17,7 @@ ARQUITETURA_POSTGRES_DB.MD
 Somente um perfil de banco pode estar ativo por projeto. Para trocar o mecanismo de persistencia, substitua o perfil ativo, por exemplo por `ARQUITETURA_SQLSERVER_DB.MD`, sem reescrever as regras de aplicacao deste documento.
 
 ## Stack Padrao
-
-### API asjdasljdlkas
+  
 
 - .NET 10
 - ASP.NET Core Web API
